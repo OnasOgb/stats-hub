@@ -23,13 +23,12 @@ function ProfilePage() {
     clean_sheets: mockCurrentUser.clean_sheets,
   });
 
-  const increment = (stat: keyof typeof stats) => {
-    setStats((prev) => ({ ...prev, [stat]: prev[stat] + 1 }));
+  const change = (stat: keyof typeof stats, delta: number) => {
+    setStats((prev) => ({ ...prev, [stat]: Math.max(0, prev[stat] + delta) }));
   };
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
       <header className="border-b border-border bg-background/90">
         <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-4 py-8">
           <div className="relative">
@@ -40,31 +39,33 @@ function ProfilePage() {
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold">{mockCurrentUser.full_name}</h1>
-            <p className="text-sm text-muted-foreground">Tap to update your stats</p>
+            <p className="text-sm text-muted-foreground">Tap + or − to update your stats</p>
           </div>
         </div>
       </header>
 
-      {/* Stat Buttons */}
       <main className="mx-auto max-w-lg px-4 pt-6">
         <div className="grid grid-cols-3 gap-3">
           <StatButton
-            label="+1 Goal"
+            label="Goals"
             icon={Goal}
             count={stats.goals}
-            onIncrement={() => increment("goals")}
+            onIncrement={() => change("goals", 1)}
+            onDecrement={() => change("goals", -1)}
           />
           <StatButton
-            label="+1 Assist"
+            label="Assists"
             icon={Handshake}
             count={stats.assists}
-            onIncrement={() => increment("assists")}
+            onIncrement={() => change("assists", 1)}
+            onDecrement={() => change("assists", -1)}
           />
           <StatButton
-            label="+1 CS"
+            label="Clean Sheets"
             icon={ShieldCheck}
             count={stats.clean_sheets}
-            onIncrement={() => increment("clean_sheets")}
+            onIncrement={() => change("clean_sheets", 1)}
+            onDecrement={() => change("clean_sheets", -1)}
           />
         </div>
 
