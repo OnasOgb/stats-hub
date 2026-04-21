@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { type LucideIcon, Plus, Minus } from "lucide-react";
 import { useState } from "react";
