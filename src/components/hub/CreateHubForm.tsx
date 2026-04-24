@@ -46,6 +46,7 @@ export function CreateHubForm() {
 
       let hub = null;
 
+      // Loop handles potential invite_code collisions
       for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
         const code = generateInviteCode();
 
@@ -64,11 +65,14 @@ export function CreateHubForm() {
           break;
         }
 
-        // Only retry on invite_code unique violation
-        if (hubError.code !== "23505") throw hubError;
+        // Logic check: If it's a name conflict for this user, stop immediately
         if (hubError.message?.includes("hubs_name_created_by_key")) {
           throw new Error("You already have a hub with this name.");
         }
+
+        // Only retry on generic unique violations (likely invite_code)
+        if (hubError.code !== "23505") throw hubError;
+        
         if (attempt === MAX_RETRIES - 1) {
           throw new Error("Could not generate a unique invite code. Please try again.");
         }
@@ -76,19 +80,15 @@ export function CreateHubForm() {
 
       if (!hub) throw new Error("Failed to create hub");
 
-      // Add creator as admin
-      const { error: memberError } = await supabase
-        .from("hub_members")
-        .insert({
-          hub_id: hub.id,
-          user_id: user.id,
-          role: "admin",
-        });
-
-      if (memberError) throw memberError;
+      /**
+       * NOTE: Manual 'hub_members' insertion removed.
+       * The Database Trigger 'handle_new_hub_admin' in setup.sql 
+       * handles this automatically and atomically.
+       */
 
       router.push(`/hub/${hub.id}/leaderboard`);
     } catch (err) {
+      console.error("Hub creation error:", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
     }
