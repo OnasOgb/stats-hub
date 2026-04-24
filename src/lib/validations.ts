@@ -8,17 +8,19 @@ export type JoinFormValues = z.infer<typeof joinFormSchema>;
 
 export const createHubSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(30),
-  invite_code: z
-    .string()
-    .min(3, "Code must be at least 3 characters")
-    .max(50)
-    .regex(
-      /^[a-z0-9-]+$/,
-      "Only lowercase letters, numbers, and hyphens allowed"
-    ),
 });
 
 export type CreateHubValues = z.infer<typeof createHubSchema>;
+
+const SAFE_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
+
+export function generateInviteCode(length = 6): string {
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += SAFE_ALPHABET[Math.floor(Math.random() * SAFE_ALPHABET.length)];
+  }
+  return code;
+}
 
 export const messageSchema = z.object({
   content: z
