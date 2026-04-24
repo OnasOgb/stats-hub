@@ -5,19 +5,25 @@ import { useRouter } from "next/navigation";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { StatButton } from "@/components/StatButton";
 import { getSupabase } from "@/lib/supabase";
-import type { Player } from "@/lib/types";
+import type { HubMemberWithProfile } from "@/lib/types";
 import { Goal, Handshake, ShieldCheck } from "lucide-react";
 
 interface PlayerProfileClientProps {
-  player: Player;
+  member: HubMemberWithProfile;
+  hubId: string;
+  isOwnProfile: boolean;
 }
 
-export function PlayerProfileClient({ player }: PlayerProfileClientProps) {
+export function PlayerProfileClient({
+  member,
+  hubId,
+  isOwnProfile,
+}: PlayerProfileClientProps) {
   const router = useRouter();
   const [stats, setStats] = useState({
-    goals: player.goals,
-    assists: player.assists,
-    clean_sheets: player.clean_sheets,
+    goals: member.goals,
+    assists: member.assists,
+    clean_sheets: member.clean_sheets,
   });
 
   const handleChange = async (
@@ -30,10 +36,11 @@ export function PlayerProfileClient({ player }: PlayerProfileClientProps) {
       [stat]: Math.max(0, prev[stat] + delta),
     }));
 
-    const rpcName = delta > 0 ? "increment_stat" : "decrement_stat";
+    const rpcName = delta > 0 ? "increment_hub_stat" : "decrement_hub_stat";
     const { error } = await getSupabase().rpc(rpcName, {
-      player_id: player.id,
-      stat_column: stat,
+      p_member_id: member.id,
+      p_stat_column: stat,
+      p_hub_id: hubId,
     });
 
     if (error) {
@@ -52,15 +59,23 @@ export function PlayerProfileClient({ player }: PlayerProfileClientProps) {
       <header className="border-b border-border bg-background/90">
         <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-4 py-8">
           <PlayerAvatar
-            name={player.name}
-            avatarUrl={player.photo_url}
+            name={member.profiles.name}
+            avatarUrl={member.profiles.avatar_url}
             size="lg"
           />
           <div className="text-center">
-            <h1 className="text-xl font-bold">{player.name}</h1>
-            <p className="text-sm text-muted-foreground">
-              Tap + or - to update your stats
-            </p>
+            <h1 className="text-xl font-bold">
+              {member.profiles.name || "Anonymous"}
+            </h1>
+            {isOwnProfile ? (
+              <p className="text-sm text-muted-foreground">
+                Tap + or - to update your stats
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Tap + or - to update stats
+              </p>
+            )}
           </div>
         </div>
       </header>
@@ -91,7 +106,7 @@ export function PlayerProfileClient({ player }: PlayerProfileClientProps) {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Honor system — stats update instantly for everyone
+          Stats update instantly for all hub members
         </p>
       </main>
     </>
