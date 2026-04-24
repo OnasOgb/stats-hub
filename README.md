@@ -1,6 +1,6 @@
-# Strider — Football Stat Tracker
+# StatsHub — Football Stat Tracker
 
-A mobile-first football (soccer) stat tracker for weekly clubs. Players join the club, self-report their match stats (goals, assists, clean sheets) on an honor system, and compete on a realtime leaderboard.
+A mobile-first football (soccer) stat tracker for weekly clubs. Create or join a hub, track match stats (goals, assists, clean sheets), chat with teammates, and compete on a realtime leaderboard.
 
 Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**. Deployed on **Vercel**.
 
@@ -8,11 +8,14 @@ Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**. Deployed on **Ver
 
 ## Features
 
-- **Player Onboarding** — Join with a name and optional profile photo (auto-compressed client-side)
+- **Multi-Tenant Hubs** — Create private hubs with unique invite codes; each hub has its own leaderboard, chat, and activity feed
+- **Authentication** — Email magic link and Google OAuth powered by Supabase Auth
 - **Stat Tracking** — Tap to increment/decrement goals, assists, and clean sheets with optimistic UI
-- **Realtime Leaderboard** — Live-updating rankings powered by Supabase Realtime (`postgres_changes`)
-- **Mobile-First Design** — Dark-mode-only UI built with shadcn/ui and OKLCH colors
-- **No Auth Required** — Honor-system stat reporting; player identity stored in `localStorage` + cookie
+- **Realtime Leaderboard** — Live-updating rankings with online presence indicators
+- **Hub Chat** — Real-time messaging scoped to each hub with optimistic updates
+- **Activity Feed** — Audit trail of all stat changes; admins can revert entries
+- **Admin Roles** — Hub creators get admin privileges with stat revert controls
+- **Mobile-First Design** — Dark-mode UI built with shadcn/ui, responsive bottom navigation
 
 ---
 
@@ -24,8 +27,10 @@ Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**. Deployed on **Ver
 | Language | TypeScript 5 |
 | UI | React 18 + shadcn/ui (new-york style) + Tailwind CSS v3 |
 | Icons | lucide-react |
-| Backend | Supabase (PostgreSQL + Storage + Realtime) |
+| Backend | Supabase (PostgreSQL + Auth + Storage + Realtime) |
 | Forms | react-hook-form + zod |
+| Charts | recharts |
+| Notifications | sonner |
 | Image Processing | browser-image-compression |
 | Deployment | Vercel |
 
@@ -36,7 +41,7 @@ Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**. Deployed on **Ver
 ### Prerequisites
 
 - Node.js 18+
-- A [Supabase](https://supabase.com) project
+- A [Supabase](https://supabase.com) project with Auth enabled (Email + Google OAuth)
 
 ### 1. Clone the repository
 
@@ -68,11 +73,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
 Run the SQL in `supabase/setup.sql` against your Supabase project. This creates:
 
-- The `players` table
-- `increment_stat` and `decrement_stat` RPC functions
-- Row Level Security policies (public read/write)
-- A `player-photos` storage bucket
-- Realtime publication on the `players` table
+- The `profiles`, `hubs`, `hub_members`, `messages`, and `stat_logs` tables
+- `increment_hub_stat` and `decrement_hub_stat` RPC functions with audit logging
+- Row Level Security policies
+- Realtime publication on `hub_members`, `messages`, and `stat_logs`
 
 ### 5. Start the dev server
 
@@ -99,78 +103,158 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```
 striders-stats-hub/
-├── app/                          # Next.js App Router pages
-│   ├── layout.tsx                # Root layout (metadata, Inter font, dark mode)
-│   ├── page.tsx                  # / — Join the Club form
-│   ├── globals.css               # Theme (OKLCH CSS custom properties)
-│   ├── error.tsx                 # Global error boundary
-│   ├── not-found.tsx             # 404 page
-│   ├── leaderboard/
-│   │   └── page.tsx              # /leaderboard — Realtime leaderboard
-│   └── player/
-│       └── [id]/
-│           └── page.tsx          # /player/:id — Player profile & stat pad
+├── app/                              # Next.js App Router pages
+│   ├── layout.tsx                    # Root layout (metadata, fonts, dark mode)
+│   ├── page.tsx                      # / — Hub listing for authenticated users
+│   ├── globals.css                   # Theme (CSS custom properties)
+│   ├── error.tsx                     # Global error boundary
+│   ├── not-found.tsx                 # 404 page
+│   ├── auth/
+│   │   ├── page.tsx                  # /auth — Magic link + Google OAuth login
+│   │   └── callback/
+│   │       └── route.ts             # OAuth callback handler
+│   ├── hub/
+│   │   ├── create/
+│   │   │   └── page.tsx             # /hub/create — Create a new hub
+│   │   └── [hubId]/
+│   │       ├── layout.tsx           # Hub layout with HubProvider context
+│   │       ├── leaderboard/
+│   │       │   └── page.tsx         # /hub/:id/leaderboard — Tabs: Leaderboard, Activity, Chat
+│   │       └── player/
+│   │           └── [memberId]/
+│   │               └── page.tsx     # /hub/:id/player/:memberId — Player stat pad
+│   └── join/
+│       ├── page.tsx                 # /join — Enter invite code
+│       └── [code]/
+│           └── page.tsx             # /join/:code — Join hub confirmation
+│
+├── middleware.ts                     # Auth guard — redirects unauthenticated users to /auth
 │
 ├── src/
 │   ├── components/
-│   │   ├── BottomNav.tsx         # Fixed bottom navigation bar
-│   │   ├── LeaderboardClient.tsx # Realtime subscription wrapper
-│   │   ├── LeaderboardTable.tsx  # Ranked player table with medals
-│   │   ├── PlayerProfileClient.tsx # Stat increment/decrement UI
-│   │   ├── StatButton.tsx        # Animated +/- stat control
-│   │   ├── PlayerAvatar.tsx      # Avatar with image or initials fallback
-│   │   └── ui/                   # shadcn/ui component library
+│   │   ├── BottomNav.tsx            # Fixed bottom navigation bar
+│   │   ├── LeaderboardTabs.tsx      # Tab container (Leaderboard / Activity / Chat)
+│   │   ├── LeaderboardClient.tsx    # Realtime subscriptions + presence tracking
+│   │   ├── LeaderboardTable.tsx     # Sortable leaderboard with online indicators
+│   │   ├── PlayerProfileClient.tsx  # Stat increment/decrement UI
+│   │   ├── StatButton.tsx           # Animated +/- stat control
+│   │   ├── PlayerAvatar.tsx         # Avatar with image or initials fallback
+│   │   ├── hub/
+│   │   │   ├── CreateHubForm.tsx    # Hub creation form with invite code generation
+│   │   │   ├── HubCard.tsx          # Hub card for listing page
+│   │   │   └── JoinHubFlow.tsx      # Join hub confirmation flow
+│   │   ├── chat/
+│   │   │   ├── HubChat.tsx          # Real-time chat with optimistic updates
+│   │   │   ├── ChatMessage.tsx      # Individual message bubble
+│   │   │   └── ChatInput.tsx        # Message input field
+│   │   ├── activity/
+│   │   │   ├── ActivityFeed.tsx     # Stat change audit log (admin can revert)
+│   │   │   └── ActivityLogItem.tsx  # Individual activity entry
+│   │   ├── providers/
+│   │   │   └── HubContext.tsx       # Hub context provider (hub, currentMember, profile)
+│   │   └── ui/                      # shadcn/ui component library
 │   ├── lib/
-│   │   ├── supabase.ts           # Browser Supabase client (lazy-initialized)
-│   │   ├── supabase-server.ts    # Server Supabase client factory
-│   │   ├── database.types.ts     # Auto-generated Supabase types
-│   │   ├── types.ts              # Player type aliases
-│   │   ├── validations.ts        # Zod form schemas
-│   │   └── utils.ts              # cn() class merging utility
+│   │   ├── supabase.ts              # Browser Supabase client (lazy-initialized)
+│   │   ├── supabase-server.ts       # Server Supabase client factory
+│   │   ├── supabase-middleware.ts   # Middleware Supabase client for auth checks
+│   │   ├── database.types.ts        # Auto-generated Supabase types
+│   │   ├── types.ts                 # App types (Profile, Hub, HubMember, Message, StatLog)
+│   │   ├── validations.ts           # Zod schemas + slugify utility
+│   │   └── utils.ts                 # cn() class merging utility
 │   └── hooks/
-│       └── use-mobile.tsx        # Mobile device detection hook
+│       ├── use-auth.ts              # Client-side auth state hook
+│       └── use-mobile.tsx           # Mobile viewport detection hook
 │
 ├── supabase/
-│   └── setup.sql                 # Full database schema & RLS setup
+│   ├── setup.sql                    # Full database schema & RLS setup
+│   └── migration-001-multi-tenant.sql # Multi-tenant migration
 │
 └── Configuration
-    ├── next.config.mjs           # Image remote patterns for Supabase Storage
-    ├── tailwind.config.ts        # Theme colors, fonts, animations
-    ├── tsconfig.json             # Path aliases (@/* → src/*)
-    ├── components.json           # shadcn/ui config
-    └── .eslintrc.json            # ESLint rules
+    ├── next.config.mjs              # Image remote patterns, route redirects
+    ├── tailwind.config.ts           # Theme colors, fonts, animations
+    ├── tsconfig.json                # Path aliases (@/* → src/*)
+    ├── components.json              # shadcn/ui config
+    └── .eslintrc.json               # ESLint rules
 ```
 
 ---
 
 ## Routes
 
-| Path | Type | Description |
-|------|------|-------------|
-| `/` | Client Component | Player onboarding — name input + photo upload |
-| `/leaderboard` | Server Component | Live leaderboard sorted by goals |
-| `/player/[id]` | Server Component | Player profile with stat increment/decrement buttons |
+| Path | Access | Description |
+|------|--------|-------------|
+| `/auth` | Public | Email magic link + Google OAuth login |
+| `/auth/callback` | Public | OAuth redirect handler |
+| `/` | Protected | Hub listing for the authenticated user |
+| `/hub/create` | Protected | Create a new hub |
+| `/join` | Protected | Enter an invite code to join a hub |
+| `/join/[code]` | Protected | Join hub confirmation page |
+| `/hub/[hubId]/leaderboard` | Protected | Leaderboard, activity feed, and chat (tabbed) |
+| `/hub/[hubId]/player/[memberId]` | Protected | Player profile with stat +/- buttons |
 
 ---
 
 ## Database Schema
 
-### `players` table
+### `profiles`
+
+| Column | Type | Default |
+|--------|------|---------|
+| `id` | `uuid` | from `auth.users` |
+| `name` | `text` | — |
+| `avatar_url` | `text` | — |
+| `updated_at` | `timestamptz` | `now()` |
+
+### `hubs`
 
 | Column | Type | Default |
 |--------|------|---------|
 | `id` | `uuid` | `gen_random_uuid()` |
 | `name` | `text` | — |
-| `photo_url` | `text` | `''` |
+| `invite_code` | `text` | unique |
+| `created_by` | `uuid` | — |
+| `created_at` | `timestamptz` | `now()` |
+
+### `hub_members`
+
+| Column | Type | Default |
+|--------|------|---------|
+| `id` | `uuid` | `gen_random_uuid()` |
+| `hub_id` | `uuid` | — |
+| `user_id` | `uuid` | — |
+| `role` | `text` | `'player'` |
 | `goals` | `int` | `0` |
 | `assists` | `int` | `0` |
 | `clean_sheets` | `int` | `0` |
+| `joined_at` | `timestamptz` | `now()` |
 | `updated_at` | `timestamptz` | `now()` |
+
+### `messages`
+
+| Column | Type | Default |
+|--------|------|---------|
+| `id` | `uuid` | `gen_random_uuid()` |
+| `hub_id` | `uuid` | — |
+| `sender_id` | `uuid` | — |
+| `content` | `text` | 1–500 chars |
+| `created_at` | `timestamptz` | `now()` |
+
+### `stat_logs`
+
+| Column | Type | Default |
+|--------|------|---------|
+| `id` | `uuid` | `gen_random_uuid()` |
+| `hub_id` | `uuid` | — |
+| `member_id` | `uuid` | — |
+| `actor_id` | `uuid` | — |
+| `stat_type` | `text` | — |
+| `delta` | `int` | `-1` or `1` |
+| `created_at` | `timestamptz` | `now()` |
 
 ### RPC Functions
 
-- **`increment_stat(player_id, stat_column)`** — Atomically increments a stat column
-- **`decrement_stat(player_id, stat_column)`** — Atomically decrements a stat column (floor of 0)
+- **`increment_hub_stat(member_id, stat_column, hub_id)`** — Atomically increments a stat and creates an audit log entry
+- **`decrement_hub_stat(member_id, stat_column, hub_id)`** — Atomically decrements a stat (floor of 0) and creates an audit log entry
 
 Both validate that `stat_column` is one of `goals`, `assists`, or `clean_sheets`.
 
@@ -178,12 +262,15 @@ Both validate that `stat_column` is one of `goals`, `assists`, or `clean_sheets`
 
 ## Architecture Decisions
 
-- **No authentication** — Stats are reported on an honor system. Player identity is persisted client-side via `localStorage` and a `strider-player-id` cookie.
-- **Realtime via Supabase** — The leaderboard subscribes to `postgres_changes` on the `players` table, so all connected clients see stat updates instantly.
-- **Optimistic UI** — Stat mutations update local state immediately, then call the Supabase RPC. On failure, the UI reverts.
-- **Atomic RPC functions** — `increment_stat`/`decrement_stat` use dynamic SQL with `SECURITY DEFINER` to prevent race conditions.
-- **Client-side image compression** — Photos are compressed to 0.5 MB / 400x400px before upload using `browser-image-compression`.
-- **Dark mode only** — The root `<html>` element has `class="dark"` hardcoded, with an OKLCH green primary color.
+- **Multi-tenant hubs** — Each hub is an isolated group with its own leaderboard, chat, and activity feed. Players join via invite codes.
+- **Supabase Auth** — Email magic link and Google OAuth. Middleware protects all routes except `/auth`.
+- **Realtime via Supabase** — The leaderboard subscribes to `postgres_changes` on `hub_members`, `messages`, and `stat_logs` for live updates across all connected clients.
+- **Presence tracking** — Online status of hub members is tracked via Supabase Realtime presence channels.
+- **Optimistic UI** — Stat mutations and chat messages update local state immediately, then sync with Supabase. On failure, the UI reverts.
+- **Atomic RPC functions** — `increment_hub_stat`/`decrement_hub_stat` use `SECURITY DEFINER` to prevent race conditions and auto-create audit log entries.
+- **Audit trail** — All stat changes are logged in `stat_logs`. Admins can revert individual entries from the activity feed.
+- **Client-side image compression** — Photos are compressed before upload using `browser-image-compression`.
+- **Dark mode** — Dark-mode-only UI with CSS custom property theming.
 
 ---
 
@@ -212,9 +299,9 @@ Components are placed in `src/components/ui/` per the `components.json` config.
 
 **Add a new stat column:**
 
-1. Add the column to the `players` table in Supabase
+1. Add the column to the `hub_members` table in Supabase
 2. Update `supabase/setup.sql` and `src/lib/database.types.ts`
-3. Add the column name to the validation list in `increment_stat`/`decrement_stat`
+3. Add the column name to the validation list in `increment_hub_stat`/`decrement_hub_stat`
 4. Add a new `StatButton` in `PlayerProfileClient`
 
 ---
