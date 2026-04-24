@@ -89,7 +89,7 @@ export function LeaderboardClient({
         const state = presenceChannel.presenceState();
         const online = new Set<string>();
         Object.values(state).forEach((presences) => {
-          (presences as { user_id: string }[]).forEach((p) => {
+          (presences as unknown as { user_id: string }[]).forEach((p) => {
             online.add(p.user_id);
           });
         });

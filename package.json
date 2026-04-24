@@ -1,5 +1,5 @@
 {
-  "name": "striders-stats-hub",
+  "name": "statshub",
   "private": true,
   "scripts": {
     "dev": "next dev",

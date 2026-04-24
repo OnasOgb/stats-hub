@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Trophy, Mail, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSupabase } from "@/lib/supabase";
 
-export default function AuthPage() {
+function AuthForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/";
   const [email, setEmail] = useState("");
@@ -172,5 +172,13 @@ export default function AuthPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense>
+      <AuthForm />
+    </Suspense>
   );
 }
