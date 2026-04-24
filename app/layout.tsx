@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -8,8 +8,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Strider — Football Stat Tracker",
+  title: "StatsHub — Football Stat Tracker",
   description: "Real-time football stat tracker for your weekly club",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "StatsHub",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#4ade80",
 };
 
 export default function RootLayout({
