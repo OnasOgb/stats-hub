@@ -1,7 +1,8 @@
 import { Trophy } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { LeaderboardClient } from "@/components/LeaderboardClient";
-import type { HubMemberWithProfile } from "@/lib/types";
+import { LeaderboardTabs } from "@/components/LeaderboardTabs";
+import type { HubMemberWithProfile, MessageWithSender, StatLogWithDetails } from "@/lib/types";
 
 export const revalidate = 0;
 
@@ -32,6 +33,22 @@ export default async function HubLeaderboardPage({
     .eq("hub_id", params.hubId)
     .order("goals", { ascending: false });
 
+  // Fetch initial messages
+  const { data: messages } = await supabase
+    .from("messages")
+    .select("*, profiles(*)")
+    .eq("hub_id", params.hubId)
+    .order("created_at", { ascending: true })
+    .limit(50);
+
+  // Fetch initial stat logs
+  const { data: statLogs } = await supabase
+    .from("stat_logs")
+    .select("*, profiles(*), hub_members(*, profiles(*))")
+    .eq("hub_id", params.hubId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
   return (
     <>
       {/* Header */}
@@ -51,12 +68,14 @@ export default async function HubLeaderboardPage({
         </div>
       </header>
 
-      {/* Content */}
+      {/* Content with Tabs */}
       <main className="mx-auto max-w-lg px-4 pt-4">
-        <LeaderboardClient
+        <LeaderboardTabs
           hubId={params.hubId}
           initialMembers={(members as HubMemberWithProfile[]) ?? []}
           currentUserId={user?.id ?? null}
+          initialMessages={(messages as MessageWithSender[]) ?? []}
+          initialStatLogs={(statLogs as StatLogWithDetails[]) ?? []}
         />
       </main>
     </>
