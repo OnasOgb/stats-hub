@@ -75,7 +75,7 @@ export default async function JoinCodePage({ params }: JoinCodePageProps) {
           </div>
         </div>
 
-        <JoinHubFlow hubId={hub.id} hubName={hub.name} />
+        <JoinHubFlow hubId={hub.id} hubName={hub.name} inviteCode={params.code} />
       </div>
     </div>
   );
