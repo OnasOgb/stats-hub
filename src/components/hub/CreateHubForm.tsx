@@ -64,8 +64,11 @@ export function CreateHubForm() {
           break;
         }
 
-        // Retry only on unique violation for invite_code
+        // Only retry on invite_code unique violation
         if (hubError.code !== "23505") throw hubError;
+        if (hubError.message?.includes("hubs_name_created_by_key")) {
+          throw new Error("You already have a hub with this name.");
+        }
         if (attempt === MAX_RETRIES - 1) {
           throw new Error("Could not generate a unique invite code. Please try again.");
         }
