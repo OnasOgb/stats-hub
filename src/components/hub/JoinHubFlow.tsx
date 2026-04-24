@@ -117,7 +117,7 @@ export function JoinHubFlow({ hubId, hubName, inviteCode }: JoinHubFlowProps) {
           </p>
           <Button
             onClick={() => router.push(`/hub/${hubId}/leaderboard`)}
-            className="w-full"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
           >
             Enter Hub
           </Button>
@@ -138,7 +138,7 @@ export function JoinHubFlow({ hubId, hubName, inviteCode }: JoinHubFlowProps) {
           Join <strong>{hubName}</strong> to start tracking your football stats
           with the group.
         </p>
-        <Button onClick={handleJoin} className="w-full" disabled={loading}>
+        <Button onClick={handleJoin} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
