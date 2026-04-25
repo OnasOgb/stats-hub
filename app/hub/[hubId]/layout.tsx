@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { HubProvider } from "@/components/providers/HubContext";
 import { BottomNav } from "@/components/BottomNav";
+import { Toaster } from "@/components/ui/sonner";
 
 interface HubLayoutProps {
   children: React.ReactNode;
@@ -59,6 +60,7 @@ export default async function HubLayout({ children, params }: HubLayoutProps) {
         {children}
       </div>
       <BottomNav hubId={params.hubId} memberId={member.id} />
+      <Toaster />
     </HubProvider>
   );
 }

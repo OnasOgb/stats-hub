@@ -12,6 +12,7 @@ import { getSupabase } from "@/lib/supabase";
 function AuthForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/";
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -26,6 +27,7 @@ function AuthForm() {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        data: { full_name: displayName.trim() },
       },
     });
 
@@ -147,6 +149,19 @@ function AuthForm() {
             {/* Magic Link Form */}
             <form onSubmit={handleMagicLink} className="space-y-4">
               <div className="space-y-2">
+                <Label htmlFor="displayName">Display Name</Label>
+                <Input
+                  id="displayName"
+                  type="text"
+                  placeholder="Your name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  required
+                  minLength={2}
+                  maxLength={30}
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -157,7 +172,11 @@ function AuthForm() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading || displayName.trim().length < 2}
+              >
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
