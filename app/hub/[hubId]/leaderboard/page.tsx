@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Home, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { LeaderboardClient } from "@/components/LeaderboardClient";
 import { LeaderboardTabs } from "@/components/LeaderboardTabs";
@@ -56,12 +55,6 @@ export default async function HubLeaderboardPage({
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-4">
-          <Link
-            href="/"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted transition-colors hover:bg-muted/80"
-          >
-            <Home className="h-5 w-5 text-muted-foreground" />
-          </Link>
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15">
             <Trophy className="h-5 w-5 text-primary" />
           </div>

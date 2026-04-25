@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Trophy, User, MessageCircle } from "lucide-react";
+import { Trophy, User, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BottomNavProps {
@@ -24,13 +24,18 @@ export function BottomNav({ hubId, memberId }: BottomNavProps) {
       label: "My Stats",
       icon: User,
     },
+    {
+      href: "/",
+      label: "Hubs",
+      icon: LayoutGrid,
+    },
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-lg items-center justify-around py-2">
         {links.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname.startsWith(href);
+          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link
               key={label}

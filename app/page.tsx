@@ -25,11 +25,6 @@ export default async function HomePage() {
 
   const hubs = memberships ?? [];
 
-  // Auto-redirect if user has exactly 1 hub
-  if (hubs.length === 1) {
-    redirect(`/hub/${hubs[0].hub_id}/leaderboard`);
-  }
-
   return (
     <div className="flex min-h-screen flex-col bg-background px-4 pb-20">
       {/* Header */}
