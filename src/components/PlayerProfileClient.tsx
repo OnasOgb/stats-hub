@@ -7,6 +7,7 @@ import { StatButton } from "@/components/StatButton";
 import { getSupabase } from "@/lib/supabase";
 import type { HubMemberWithProfile } from "@/lib/types";
 import { Goal, Handshake, ShieldCheck } from "lucide-react";
+import { UserAvatarButton } from "@/components/UserAvatarButton";
 
 interface PlayerProfileClientProps {
   member: HubMemberWithProfile;
@@ -57,7 +58,11 @@ export function PlayerProfileClient({
   return (
     <>
       <header className="border-b border-border bg-background/90">
-        <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-4 py-8">
+        <div className="mx-auto max-w-lg px-4 py-8 relative">
+          <div className="absolute top-4 right-4">
+            <UserAvatarButton />
+          </div>
+          <div className="flex flex-col items-center gap-4">
           <PlayerAvatar
             name={member.profiles.name}
             avatarUrl={member.profiles.avatar_url}
@@ -77,6 +82,7 @@ export function PlayerProfileClient({
               </p>
             )}
           </div>
+        </div>
         </div>
       </header>
 

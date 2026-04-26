@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { LeaderboardClient } from "@/components/LeaderboardClient";
 import { LeaderboardTabs } from "@/components/LeaderboardTabs";
 import { CopyInviteCode } from "@/components/hub/CopyInviteCode";
+import { UserAvatarButton } from "@/components/UserAvatarButton";
 import type { HubMemberWithProfile, MessageWithSender, StatLogWithDetails } from "@/lib/types";
 
 export const revalidate = 0;
@@ -63,6 +64,9 @@ export default async function HubLeaderboardPage({
               {hub?.name ?? "Hub"}
             </h1>
             <CopyInviteCode inviteCode={hub?.invite_code ?? ""} />
+          </div>
+          <div className="shrink-0">
+            <UserAvatarButton />
           </div>
         </div>
       </header>
