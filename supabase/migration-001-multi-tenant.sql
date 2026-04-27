@@ -144,7 +144,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Profiles
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read profiles" ON profiles;
 CREATE POLICY "Anyone can read profiles" ON profiles FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE
   USING (id = auth.uid()) WITH CHECK (id = auth.uid());
 

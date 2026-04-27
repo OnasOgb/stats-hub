@@ -13,33 +13,42 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Public read access for all avatars
+DROP POLICY IF EXISTS "Public avatar read access" ON storage.objects;
+
 CREATE POLICY "Public avatar read access"
   ON storage.objects FOR SELECT
+  TO PUBLIC
   USING (bucket_id = 'avatars');
 
 -- 3. Authenticated users can upload to their own folder
+DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
+
 CREATE POLICY "Users can upload their own avatar"
   ON storage.objects FOR INSERT
+  TO authenticated
   WITH CHECK (
     bucket_id = 'avatars'
-    AND auth.role() = 'authenticated'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 -- 4. Users can update their own avatars
+DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
+
 CREATE POLICY "Users can update their own avatar"
   ON storage.objects FOR UPDATE
-  USING (
+  TO authenticated
+  WITH CHECK (
     bucket_id = 'avatars'
-    AND auth.role() = 'authenticated'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 -- 5. Users can delete their own avatars
+DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
+
 CREATE POLICY "Users can delete their own avatar"
   ON storage.objects FOR DELETE
+  TO authenticated
   USING (
     bucket_id = 'avatars'
-    AND auth.role() = 'authenticated'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );

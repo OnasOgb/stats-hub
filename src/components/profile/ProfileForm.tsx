@@ -110,7 +110,9 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
           name: values.name,
           avatar_url: newAvatarUrl,
         })
-        .eq("id", profile.id);
+        .eq("id", profile.id)
+        .select()
+        .single();
 
       if (updateError) throw new Error("Failed to update profile");
 

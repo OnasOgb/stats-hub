@@ -4,7 +4,6 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { Button } from "@/components/ui/button";
 import { HubCard } from "@/components/hub/HubCard";
-import { UserAvatarButton } from "@/components/UserAvatarButton";
 
 export const revalidate = 0;
 
@@ -37,9 +36,6 @@ export default async function HomePage() {
           <div>
             <h1 className="text-lg font-bold tracking-tight">StatsHub</h1>
             <p className="text-xs text-muted-foreground">Your Hubs</p>
-          </div>
-          <div className="ml-auto">
-            <UserAvatarButton />
           </div>
         </div>
       </header>

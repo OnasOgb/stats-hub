@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
-import { ArrowLeft, User } from "lucide-react";
-import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { ProfileForm } from "@/components/profile/ProfileForm";
+import { BackButton } from "@/components/BackButton";
 
 export const revalidate = 0;
 
@@ -31,12 +30,7 @@ export default async function ProfilePage() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md -mx-4 px-4">
         <div className="mx-auto flex max-w-lg items-center gap-3 py-4">
-          <Link
-            href="/"
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 transition-colors hover:bg-primary/25"
-          >
-            <ArrowLeft className="h-5 w-5 text-primary" />
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-lg font-bold tracking-tight">Profile</h1>
             <p className="text-xs text-muted-foreground">
