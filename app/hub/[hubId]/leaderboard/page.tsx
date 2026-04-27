@@ -2,7 +2,7 @@ import { Trophy } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { LeaderboardClient } from "@/components/LeaderboardClient";
 import { LeaderboardTabs } from "@/components/LeaderboardTabs";
-import { CopyInviteCode } from "@/components/hub/CopyInviteCode";
+import { CopyInviteLink } from "@/components/hub/CopyInviteCode";
 import { UserAvatarButton } from "@/components/UserAvatarButton";
 import type { HubMemberWithProfile, MessageWithSender, StatLogWithDetails } from "@/lib/types";
 
@@ -35,6 +35,8 @@ export default async function HubLeaderboardPage({
     .eq("hub_id", params.hubId)
     .order("goals", { ascending: false });
 
+  const currentMember = members?.find((m) => m.user_id === user?.id);
+
   // Fetch initial messages
   const { data: messages } = await supabase
     .from("messages")
@@ -63,7 +65,9 @@ export default async function HubLeaderboardPage({
             <h1 className="text-lg font-bold tracking-tight truncate">
               {hub?.name ?? "Hub"}
             </h1>
-            <CopyInviteCode inviteCode={hub?.invite_code ?? ""} />
+            {currentMember?.role === "admin" && (
+              <CopyInviteLink inviteCode={hub?.invite_code ?? ""} />
+            )}
           </div>
           <div className="shrink-0">
             <UserAvatarButton />
