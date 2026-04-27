@@ -17,10 +17,10 @@ export default async function HomePage() {
     redirect("/auth");
   }
 
-  // Fetch user's hubs with hub details
+  // Fetch user's hubs with hub details and member counts
   const { data: memberships } = await supabase
     .from("hub_members")
-    .select("*, hubs(*)")
+    .select("*, hubs(*, hub_members(count))")
     .eq("user_id", user.id);
 
   const hubs = memberships ?? [];
@@ -98,6 +98,7 @@ export default async function HomePage() {
                   key={membership.id}
                   hub={membership.hubs!}
                   role={membership.role}
+                  memberCount={membership.hubs?.hub_members?.[0]?.count ?? 0}
                 />
               ))}
             </div>

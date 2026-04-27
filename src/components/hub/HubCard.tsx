@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { ChevronRight, Shield } from "lucide-react";
+import { ChevronRight, Shield, Users } from "lucide-react";
 import type { Hub } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 interface HubCardProps {
   hub: Hub;
   role: string;
+  memberCount: number;
 }
 
-export function HubCard({ hub, role }: HubCardProps) {
+export function HubCard({ hub, role, memberCount }: HubCardProps) {
   return (
     <Link
       href={`/hub/${hub.id}/leaderboard`}
@@ -28,8 +28,9 @@ export function HubCard({ hub, role }: HubCardProps) {
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground truncate">
-          /{hub.invite_code}
+        <p className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Users className="h-3 w-3" />
+          {memberCount} {memberCount === 1 ? "member" : "members"}
         </p>
       </div>
 
