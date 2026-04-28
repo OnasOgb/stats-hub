@@ -99,6 +99,7 @@ export default async function HomePage() {
                   hub={membership.hubs!}
                   role={membership.role}
                   memberCount={membership.hubs?.hub_members?.[0]?.count ?? 0}
+                  membershipId={membership.id}
                 />
               ))}
             </div>
