@@ -1,11 +1,5 @@
 import { z } from "zod";
 
-export const joinFormSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100),
-});
-
-export type JoinFormValues = z.infer<typeof joinFormSchema>;
-
 export const createHubSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(30),
 });
@@ -41,12 +35,3 @@ export const messageSchema = z.object({
 
 export type MessageValues = z.infer<typeof messageSchema>;
 
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
