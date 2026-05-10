@@ -1,14 +1,11 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LeaderboardClient } from "@/components/LeaderboardClient";
-import { HubChat } from "@/components/chat/HubChat";
-import { ActivityFeed } from "@/components/activity/ActivityFeed";
-import type {
-  HubMemberWithProfile,
-  MessageWithSender,
-  StatLogWithDetails,
-} from "@/lib/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { LeaderboardClient } from "./LeaderboardClient";
+import { HubChat } from "@/features/chat/components/HubChat";
+import { ActivityFeed } from "@/features/activity/components/ActivityFeed";
+import type { HubMemberWithProfile, StatLogWithDetails } from "../lib/types";
+import type { MessageWithSender } from "@/features/chat/lib/types";
 
 interface LeaderboardTabsProps {
   hubId: string;

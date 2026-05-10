@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { PlayerAvatar } from "@/components/PlayerAvatar";
-import type { HubMemberWithProfile } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
+import type { HubMemberWithProfile } from "../lib/types";
+import { cn } from "@/shared/lib/utils";
 
 interface LeaderboardTableProps {
   hubId: string;

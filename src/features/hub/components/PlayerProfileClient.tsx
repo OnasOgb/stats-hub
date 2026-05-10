@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PlayerAvatar } from "@/components/PlayerAvatar";
-import { StatButton } from "@/components/StatButton";
-import { getSupabase } from "@/lib/supabase";
-import type { HubMemberWithProfile } from "@/lib/types";
+import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
+import { StatButton } from "./StatButton";
+import { getSupabase } from "@/shared/lib/supabase";
+import type { HubMemberWithProfile } from "../lib/types";
 import { Goal, Handshake, ShieldCheck } from "lucide-react";
-import { UserAvatarButton } from "@/components/UserAvatarButton";
+import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton";
 
 interface PlayerProfileClientProps {
   member: HubMemberWithProfile;

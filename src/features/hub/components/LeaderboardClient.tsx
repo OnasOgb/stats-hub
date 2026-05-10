@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSupabase } from "@/lib/supabase";
-import { LeaderboardTable } from "@/components/LeaderboardTable";
-import type { HubMemberWithProfile } from "@/lib/types";
+import { getSupabase } from "@/shared/lib/supabase";
+import { LeaderboardTable } from "./LeaderboardTable";
+import type { HubMemberWithProfile } from "../lib/types";
 
 interface LeaderboardClientProps {
   hubId: string;

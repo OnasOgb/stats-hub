@@ -11,14 +11,14 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { getSupabase } from "@/lib/supabase";
-import type { Hub } from "@/lib/types";
+import { getSupabase } from "@/shared/lib/supabase";
+import type { Hub } from "../lib/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +28,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/shared/components/ui/alert-dialog";
 
 interface HubCardProps {
   hub: Hub;

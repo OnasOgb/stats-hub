@@ -5,16 +5,16 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { getSupabase } from "@/lib/supabase";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { getSupabase } from "@/shared/lib/supabase";
 import {
   createHubSchema,
   type CreateHubValues,
   generateInviteCode,
-} from "@/lib/validations";
+} from "../lib/validations";
 
 const MAX_RETRIES = 3;
 
