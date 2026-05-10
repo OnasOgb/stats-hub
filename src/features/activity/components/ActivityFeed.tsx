@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSupabase } from "@/lib/supabase";
-import { useHub } from "@/components/providers/HubContext";
-import { ActivityLogItem } from "@/components/activity/ActivityLogItem";
+import { getSupabase } from "@/shared/lib/supabase";
+import { useHub } from "@/features/hub/providers/HubContext";
+import { ActivityLogItem } from "./ActivityLogItem";
 import { toast } from "sonner";
-import type { StatLogWithDetails } from "@/lib/types";
+import type { StatLogWithDetails } from "@/features/hub/lib/types";
 
 interface ActivityFeedProps {
   hubId: string;

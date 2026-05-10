@@ -1,7 +1,7 @@
 "use client";
 
 import { Goal, Handshake, ShieldCheck, TrendingUp, TrendingDown } from "lucide-react";
-import { PlayerAvatar } from "@/components/PlayerAvatar";
+import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
 import { formatDistanceToNow } from "date-fns";
 
 interface ActivityLogItemProps {
