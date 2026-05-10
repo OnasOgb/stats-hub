@@ -6,17 +6,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import imageCompression from "browser-image-compression";
 import { Camera, Loader2, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { PlayerAvatar } from "@/components/PlayerAvatar";
-import { getSupabase } from "@/lib/supabase";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Separator } from "@/shared/components/ui/separator";
+import { PlayerAvatar } from "./PlayerAvatar";
+import { getSupabase } from "@/shared/lib/supabase";
 import {
   profileFormSchema,
   type ProfileFormValues,
-} from "@/lib/validations";
-import type { Profile } from "@/lib/types";
+} from "../lib/validations";
+import type { Profile } from "@/shared/lib/types";
 
 interface ProfileFormProps {
   profile: Profile;

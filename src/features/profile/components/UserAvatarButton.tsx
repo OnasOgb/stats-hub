@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getSupabase } from "@/lib/supabase";
-import { PlayerAvatar } from "@/components/PlayerAvatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { Profile } from "@/lib/types";
+import { getSupabase } from "@/shared/lib/supabase";
+import { PlayerAvatar } from "./PlayerAvatar";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import type { Profile } from "@/shared/lib/types";
 
 export function UserAvatarButton() {
   const [profile, setProfile] = useState<Profile | null>(null);
