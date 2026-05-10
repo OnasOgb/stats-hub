@@ -1,7 +1,7 @@
 "use client";
 
-import { PlayerAvatar } from "@/components/PlayerAvatar";
-import { cn } from "@/lib/utils";
+import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
+import { cn } from "@/shared/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
 interface ChatMessageProps {

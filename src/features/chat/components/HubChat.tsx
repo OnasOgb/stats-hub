@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getSupabase } from "@/lib/supabase";
-import { useHub } from "@/components/providers/HubContext";
-import { ChatMessage } from "@/components/chat/ChatMessage";
-import { ChatInput } from "@/components/chat/ChatInput";
+import { getSupabase } from "@/shared/lib/supabase";
+import { useHub } from "@/features/hub/providers/HubContext";
+import { ChatMessage } from "./ChatMessage";
+import { ChatInput } from "./ChatInput";
 import { toast } from "sonner";
-import type { MessageWithSender } from "@/lib/types";
+import type { MessageWithSender } from "../lib/types";
 
 interface HubChatProps {
   hubId: string;
