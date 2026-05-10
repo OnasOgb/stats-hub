@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createMiddlewareSupabaseClient } from "@/lib/supabase-middleware";
+import { createMiddlewareSupabaseClient } from "@/shared/lib/supabase-middleware";
 
 const PUBLIC_PATHS = ["/auth", "/auth/callback"];
 
