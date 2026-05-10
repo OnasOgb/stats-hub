@@ -1,10 +1,10 @@
 import { Trophy } from "lucide-react";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { LeaderboardClient } from "@/components/LeaderboardClient";
-import { LeaderboardTabs } from "@/components/LeaderboardTabs";
-import { CopyInviteLink } from "@/components/hub/CopyInviteCode";
-import { UserAvatarButton } from "@/components/UserAvatarButton";
-import type { HubMemberWithProfile, MessageWithSender, StatLogWithDetails } from "@/lib/types";
+import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { LeaderboardTabs } from "@/features/hub/components/LeaderboardTabs";
+import { CopyInviteLink } from "@/features/hub/components/CopyInviteLink";
+import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton";
+import type { HubMemberWithProfile, StatLogWithDetails } from "@/features/hub/lib/types";
+import type { MessageWithSender } from "@/features/chat/lib/types";
 
 export const revalidate = 0;
 

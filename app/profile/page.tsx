@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { ProfileForm } from "@/components/profile/ProfileForm";
-import { BackButton } from "@/components/BackButton";
+import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { ProfileForm } from "@/features/profile/components/ProfileForm";
+import { BackButton } from "@/features/navigation/components/BackButton";
 
 export const revalidate = 0;
 

@@ -1,8 +1,8 @@
 import { redirect, notFound } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { HubProvider } from "@/components/providers/HubContext";
-import { BottomNav } from "@/components/BottomNav";
-import { Toaster } from "@/components/ui/sonner";
+import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { HubProvider } from "@/features/hub/providers/HubContext";
+import { BottomNav } from "@/features/navigation/components/BottomNav";
+import { Toaster } from "@/shared/components/ui/sonner";
 
 interface HubLayoutProps {
   children: React.ReactNode;

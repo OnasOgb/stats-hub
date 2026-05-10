@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { Trophy, Plus, LogIn } from "lucide-react";
 import Link from "next/link";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { Button } from "@/components/ui/button";
-import { HubCard } from "@/components/hub/HubCard";
+import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { Button } from "@/shared/components/ui/button";
+import { HubCard } from "@/features/hub/components/HubCard";
 
 export const revalidate = 0;
 

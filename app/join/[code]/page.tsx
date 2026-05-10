@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { JoinHubFlow } from "@/components/hub/JoinHubFlow";
+import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { JoinHubFlow } from "@/features/hub/components/JoinHubFlow";
 import { Trophy, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 
 interface JoinCodePageProps {
   params: { code: string };

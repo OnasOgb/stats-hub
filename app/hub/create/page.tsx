@@ -1,5 +1,5 @@
 import { Trophy } from "lucide-react";
-import { CreateHubForm } from "@/components/hub/CreateHubForm";
+import { CreateHubForm } from "@/features/hub/components/CreateHubForm";
 
 export default function CreateHubPage() {
   return (

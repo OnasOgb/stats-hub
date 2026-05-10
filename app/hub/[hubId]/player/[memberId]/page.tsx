@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
-import { PlayerProfileClient } from "@/components/PlayerProfileClient";
-import type { HubMemberWithProfile } from "@/lib/types";
+import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { PlayerProfileClient } from "@/features/hub/components/PlayerProfileClient";
+import type { HubMemberWithProfile } from "@/features/hub/lib/types";
 
 interface PlayerPageProps {
   params: { hubId: string; memberId: string };
