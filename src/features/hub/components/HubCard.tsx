@@ -54,7 +54,7 @@ export function HubCard({ hub, role, memberCount, membershipId }: HubCardProps) 
       .eq("id", membershipId);
 
     if (error) {
-      console.error("Failed to leave hub:", error);
+      console.error("Failed to leave hub", { error, membershipId });
       setLoading(false);
       return;
     }
@@ -71,7 +71,7 @@ export function HubCard({ hub, role, memberCount, membershipId }: HubCardProps) 
       .eq("id", hub.id);
 
     if (error) {
-      console.error("Failed to delete hub:", error);
+      console.error("Failed to delete hub", { error, hubId: hub.id });
       setLoading(false);
       return;
     }

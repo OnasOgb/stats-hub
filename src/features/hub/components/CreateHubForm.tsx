@@ -88,7 +88,7 @@ export function CreateHubForm() {
 
       router.push(`/hub/${hub.id}/leaderboard`);
     } catch (err) {
-      console.error("Hub creation error:", err);
+      console.error("Hub creation error", { err });
       setError(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
     }
