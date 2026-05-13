@@ -11,6 +11,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
 import { getSupabase } from "@/shared/lib/supabase";
 import type { Hub } from "../lib/types";
 import {
@@ -54,7 +55,7 @@ export function HubCard({ hub, role, memberCount, membershipId }: HubCardProps) 
       .eq("id", membershipId);
 
     if (error) {
-      console.error("Failed to leave hub", { error, membershipId });
+      Sentry.captureException(error, { extra: { context: "HubCard: leave hub", membershipId } });
       setLoading(false);
       return;
     }
@@ -71,7 +72,7 @@ export function HubCard({ hub, role, memberCount, membershipId }: HubCardProps) 
       .eq("id", hub.id);
 
     if (error) {
-      console.error("Failed to delete hub", { error, hubId: hub.id });
+      Sentry.captureException(error, { extra: { context: "HubCard: delete hub", hubId: hub.id } });
       setLoading(false);
       return;
     }

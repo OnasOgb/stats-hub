@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
 import { StatButton } from "./StatButton";
+import * as Sentry from "@sentry/nextjs";
 import { getSupabase } from "@/shared/lib/supabase";
 import type { HubMemberWithProfile } from "../lib/types";
 import { Goal, Handshake, ShieldCheck } from "lucide-react";
@@ -45,6 +46,7 @@ export function PlayerProfileClient({
     });
 
     if (error) {
+      Sentry.captureException(error, { extra: { context: "PlayerProfile: stat update", stat, memberId: member.id } });
       // Revert on failure
       setStats((prev) => ({
         ...prev,

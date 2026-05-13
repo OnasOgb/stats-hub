@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import * as Sentry from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -88,7 +89,7 @@ export function CreateHubForm() {
 
       router.push(`/hub/${hub.id}/leaderboard`);
     } catch (err) {
-      console.error("Hub creation error", { err });
+      Sentry.captureException(err, { extra: { context: "CreateHubForm: hub creation" } });
       setError(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
     }

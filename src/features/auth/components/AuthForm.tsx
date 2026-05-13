@@ -8,6 +8,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import * as Sentry from "@sentry/nextjs";
 import { getSupabase } from "@/shared/lib/supabase";
 
 function GoogleButton({
@@ -91,6 +92,7 @@ export function AuthForm() {
     });
 
     if (error) {
+      Sentry.captureException(error, { extra: { context: "AuthForm: OTP sign-in" } });
       setError(error.message);
       setLoading(false);
     } else {
@@ -111,6 +113,7 @@ export function AuthForm() {
     });
 
     if (error) {
+      Sentry.captureException(error, { extra: { context: "AuthForm: Google OAuth" } });
       setError(error.message);
       setLoading(false);
     }
