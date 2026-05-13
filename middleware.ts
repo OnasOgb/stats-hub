@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createMiddlewareSupabaseClient } from "@/shared/lib/supabase-middleware";
+import { logger } from "@/shared/lib/logger";
 
 const PUBLIC_PATHS = ["/auth", "/auth/callback"];
+const mwLogger = logger.child({ module: "middleware" });
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip static assets, PWA files, Next.js internals
+  // Skip static assets, PWA files, Next.js internals — no logging
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -18,33 +20,50 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const response = NextResponse.next();
-  const supabase = createMiddlewareSupabaseClient(request, response);
+  const start = Date.now();
+  const method = request.method;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const response = NextResponse.next();
+    const supabase = createMiddlewareSupabaseClient(request, response);
 
-  const isPublicPath = PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p + "/")
-  );
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  // Redirect unauthenticated users to /auth
-  if (!user && !isPublicPath) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+    const userId = user?.id ?? null;
+
+    const isPublicPath = PUBLIC_PATHS.some(
+      (p) => pathname === p || pathname.startsWith(p + "/")
+    );
+
+    // Redirect unauthenticated users to /auth
+    if (!user && !isPublicPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth";
+      url.searchParams.set("next", pathname);
+      const duration = Date.now() - start;
+      mwLogger.info({ method, path: pathname, duration, userId }, "request completed");
+      return NextResponse.redirect(url);
+    }
+
+    // Redirect authenticated users away from /auth
+    if (user && isPublicPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      const duration = Date.now() - start;
+      mwLogger.info({ method, path: pathname, duration, userId }, "request completed");
+      return NextResponse.redirect(url);
+    }
+
+    const duration = Date.now() - start;
+    mwLogger.info({ method, path: pathname, duration, userId }, "request completed");
+    return response;
+  } catch (error) {
+    const duration = Date.now() - start;
+    mwLogger.error({ method, path: pathname, duration, err: error }, "middleware error");
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
-
-  // Redirect authenticated users away from /auth
-  if (user && isPublicPath) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
-
-  return response;
 }
 
 export const config = {
