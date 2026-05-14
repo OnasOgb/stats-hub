@@ -5,6 +5,7 @@ import { getSupabase } from "@/shared/lib/supabase";
 import { useHub } from "@/features/hub/providers/HubContext";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
+import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 import type { MessageWithSender } from "../lib/types";
 
@@ -108,6 +109,7 @@ export function HubChat({ hubId, initialMessages }: HubChatProps) {
       });
 
     if (error) {
+      Sentry.captureException(error, { extra: { context: "HubChat: message send" } });
       // Remove optimistic on error
       setMessages((prev) => prev.filter((m) => m.id !== id));
       setPendingIds((prev) => {

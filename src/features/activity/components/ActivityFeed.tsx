@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getSupabase } from "@/shared/lib/supabase";
 import { useHub } from "@/features/hub/providers/HubContext";
 import { ActivityLogItem } from "./ActivityLogItem";
+import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 import type { StatLogWithDetails } from "@/features/hub/lib/types";
 
@@ -80,6 +81,7 @@ export function ActivityFeed({ hubId, initialLogs }: ActivityFeedProps) {
     });
 
     if (rpcError) {
+      Sentry.captureException(rpcError, { extra: { context: "ActivityFeed: stat revert RPC", logId: log.id, statType: log.stat_type } });
       toast.error("Failed to revert stat");
       return;
     }
@@ -91,6 +93,7 @@ export function ActivityFeed({ hubId, initialLogs }: ActivityFeedProps) {
       .eq("id", log.id);
 
     if (deleteError) {
+      Sentry.captureException(deleteError, { extra: { context: "ActivityFeed: stat log deletion", logId: log.id } });
       toast.error("Stat reverted but log entry couldn't be removed");
     }
   };

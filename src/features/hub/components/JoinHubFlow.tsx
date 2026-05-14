@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
+import * as Sentry from "@sentry/nextjs";
 import { getSupabase } from "@/shared/lib/supabase";
 
 interface JoinHubFlowProps {
@@ -48,7 +49,8 @@ export function JoinHubFlow({ hubId, hubName, inviteCode }: JoinHubFlowProps) {
           setIsMember(!!existing);
           setCheckingMembership(false);
         }
-      } catch {
+      } catch (err) {
+        Sentry.captureException(err, { extra: { context: "JoinHubFlow: membership check" } });
         if (!cancelled) {
           setCheckingMembership(false);
         }
@@ -92,6 +94,7 @@ export function JoinHubFlow({ hubId, hubName, inviteCode }: JoinHubFlowProps) {
         router.push(`/hub/${hubId}/leaderboard`);
         return;
       }
+      Sentry.captureException(err, { extra: { context: "JoinHubFlow: join" } });
       setError(err instanceof Error ? err.message : "Failed to join hub");
       setLoading(false);
     }

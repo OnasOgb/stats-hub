@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Link, Check } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 
 interface CopyInviteLinkProps {
@@ -18,7 +19,8 @@ export function CopyInviteLink({ inviteCode }: CopyInviteLinkProps) {
       setCopied(true);
       toast.success("Invite link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } catch (err) {
+      Sentry.captureException(err, { extra: { context: "CopyInviteLink: clipboard write" } });
       toast.error("Failed to copy invite link");
     }
   };

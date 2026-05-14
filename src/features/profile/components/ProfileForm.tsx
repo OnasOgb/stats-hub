@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import imageCompression from "browser-image-compression";
+import * as Sentry from "@sentry/nextjs";
 import { Camera, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -58,7 +59,8 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
 
       setAvatarFile(compressed);
       setAvatarPreview(URL.createObjectURL(compressed));
-    } catch {
+    } catch (err) {
+      Sentry.captureException(err, { extra: { context: "ProfileForm: image compression" } });
       setError("Failed to process image. Try a different file.");
     }
   };
@@ -98,7 +100,9 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
         ) {
           const oldPath = profile.avatar_url.split("/avatars/")[1];
           if (oldPath) {
-            supabase.storage.from("avatars").remove([oldPath]).catch(() => {});
+            supabase.storage.from("avatars").remove([oldPath]).catch((err) => {
+              console.warn("ProfileForm: old avatar cleanup failed", { err }); 
+            });
           }
         }
       }
@@ -118,6 +122,7 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
 
       router.refresh();
     } catch (err) {
+      Sentry.captureException(err, { extra: { context: "ProfileForm: profile update" } });
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setSubmitting(false);
