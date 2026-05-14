@@ -29,7 +29,12 @@ export async function middleware(request: NextRequest) {
 
     const {
       data: { user },
+      error: getUserError,
     } = await supabase.auth.getUser();
+
+    if (getUserError) {
+      mwLogger.error({ err: getUserError, method, path: pathname }, "middleware: getUser failed");
+    }
 
     const userId = user?.id ?? null;
 

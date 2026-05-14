@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { pageLogger } from "@/shared/lib/logger";
 import { ProfileForm } from "@/features/profile/components/ProfileForm";
 import { BackButton } from "@/features/navigation/components/BackButton";
 
@@ -15,11 +16,15 @@ export default async function ProfilePage() {
     redirect("/auth");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
+
+  if (profileError) {
+    pageLogger.error({ err: profileError }, "profile: failed to fetch profile");
+  }
 
   if (!profile) {
     redirect("/auth");

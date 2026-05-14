@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { pageLogger } from "@/shared/lib/logger";
 import { JoinHubFlow } from "@/features/hub/components/JoinHubFlow";
 import { Trophy, AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -20,11 +21,15 @@ export default async function JoinCodePage({ params }: JoinCodePageProps) {
   }
 
   // Look up hub by invite code
-  const { data: hub } = await supabase
+  const { data: hub, error: hubError } = await supabase
     .from("hubs")
     .select("*")
     .eq("invite_code", params.code)
     .single();
+
+  if (hubError && hubError.code !== "PGRST116") {
+    pageLogger.error({ err: hubError, inviteCode: params.code }, "join: failed to look up hub");
+  }
 
   if (!hub) {
     return (
@@ -49,12 +54,16 @@ export default async function JoinCodePage({ params }: JoinCodePageProps) {
   }
 
   // Check if already a member
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("hub_members")
     .select("id")
     .eq("hub_id", hub.id)
     .eq("user_id", user.id)
     .maybeSingle();
+
+  if (existingError) {
+    pageLogger.error({ err: existingError, hubId: hub.id }, "join: failed to check membership");
+  }
 
   if (existing) {
     redirect(`/hub/${hub.id}/leaderboard`);

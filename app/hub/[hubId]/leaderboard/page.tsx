@@ -1,5 +1,6 @@
 import { Trophy } from "lucide-react";
 import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { hubLogger } from "@/shared/lib/logger";
 import { LeaderboardTabs } from "@/features/hub/components/LeaderboardTabs";
 import { CopyInviteLink } from "@/features/hub/components/CopyInviteLink";
 import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton";
@@ -22,36 +23,52 @@ export default async function HubLeaderboardPage({
   } = await supabase.auth.getUser();
 
   // Fetch hub info
-  const { data: hub } = await supabase
+  const { data: hub, error: hubError } = await supabase
     .from("hubs")
     .select("*")
     .eq("id", params.hubId)
     .single();
 
+  if (hubError) {
+    hubLogger.error({ err: hubError, hubId: params.hubId }, "leaderboard: failed to fetch hub");
+  }
+
   // Fetch all members with profiles
-  const { data: members } = await supabase
+  const { data: members, error: membersError } = await supabase
     .from("hub_members")
     .select("*, profiles(*)")
     .eq("hub_id", params.hubId)
     .order("goals", { ascending: false });
 
+  if (membersError) {
+    hubLogger.error({ err: membersError, hubId: params.hubId }, "leaderboard: failed to fetch members");
+  }
+
   const currentMember = members?.find((m) => m.user_id === user?.id);
 
   // Fetch initial messages
-  const { data: messages } = await supabase
+  const { data: messages, error: messagesError } = await supabase
     .from("messages")
     .select("*, profiles(*)")
     .eq("hub_id", params.hubId)
     .order("created_at", { ascending: true })
     .limit(50);
 
+  if (messagesError) {
+    hubLogger.error({ err: messagesError, hubId: params.hubId }, "leaderboard: failed to fetch messages");
+  }
+
   // Fetch initial stat logs
-  const { data: statLogs } = await supabase
+  const { data: statLogs, error: statLogsError } = await supabase
     .from("stat_logs")
     .select("*, profiles(*), hub_members(*, profiles(*))")
     .eq("hub_id", params.hubId)
     .order("created_at", { ascending: false })
     .limit(50);
+
+  if (statLogsError) {
+    hubLogger.error({ err: statLogsError, hubId: params.hubId }, "leaderboard: failed to fetch stat logs");
+  }
 
   return (
     <>

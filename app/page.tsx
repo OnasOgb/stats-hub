@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Trophy, Plus, LogIn } from "lucide-react";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
+import { pageLogger } from "@/shared/lib/logger";
 import { Button } from "@/shared/components/ui/button";
 import { HubCard } from "@/features/hub/components/HubCard";
 
@@ -18,10 +19,14 @@ export default async function HomePage() {
   }
 
   // Fetch user's hubs with hub details and member counts
-  const { data: memberships } = await supabase
+  const { data: memberships, error: membershipsError } = await supabase
     .from("hub_members")
     .select("*, hubs(*, hub_members(count))")
     .eq("user_id", user.id);
+
+  if (membershipsError) {
+    pageLogger.error({ err: membershipsError }, "home: failed to fetch hub memberships");
+  }
 
   const hubs = memberships ?? [];
 

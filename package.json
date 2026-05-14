@@ -2,7 +2,7 @@
   "name": "statshub",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev | pino-pretty --colorize",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
