@@ -43,3 +43,9 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Claude Code skills
+.claude/
+.agents/
+skills-lock.json
+LAYERED_LOGGING_PLAN.html
