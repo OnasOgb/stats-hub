@@ -2,7 +2,7 @@
 
 A mobile-first football (soccer) stat tracker for weekly clubs. Create or join a hub, track match stats (goals, assists, clean sheets), chat with teammates, and compete on a realtime leaderboard.
 
-Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**. Deployed on **Vercel**.
+Built with **Next.js 14**, **Supabase**, **Tailwind CSS**, and **Sentry**. Deployed on **Vercel**.
 
 ---
 
@@ -15,6 +15,11 @@ Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**. Deployed on **Ver
 - **Hub Chat** — Real-time messaging scoped to each hub with optimistic updates
 - **Activity Feed** — Audit trail of all stat changes; admins can revert entries
 - **Admin Roles** — Hub creators get admin privileges with stat revert controls
+- **Profile Management** — Edit display name, upload and compress avatar photos, sign out
+- **Hub Management** — Leave or delete hubs with confirmation dialogs
+- **Error Monitoring** — Sentry integration across all components with error boundaries and session replay
+- **Structured Logging** — Pino-based logging with module-specific loggers and pretty-print in development
+- **PWA Support** — Web app manifest with icons for mobile home screen installation
 - **Mobile-First Design** — Dark-mode UI built with shadcn/ui, responsive bottom navigation
 
 ---
@@ -31,6 +36,8 @@ Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**. Deployed on **Ver
 | Forms | react-hook-form + zod |
 | Charts | recharts |
 | Notifications | sonner |
+| Error Monitoring | @sentry/nextjs (server, client, edge) |
+| Logging | pino + pino-pretty |
 | Image Processing | browser-image-compression |
 | Deployment | Vercel |
 
@@ -42,12 +49,13 @@ Built with **Next.js 14**, **Supabase**, and **Tailwind CSS**. Deployed on **Ver
 
 - Node.js 18+
 - A [Supabase](https://supabase.com) project with Auth enabled (Email + Google OAuth)
+- A [Sentry](https://sentry.io) project (optional, for error monitoring)
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/striders-stats-hub.git
-cd striders-stats-hub
+git clone https://github.com/<your-username>/stats-hub.git
+cd stats-hub
 ```
 
 ### 2. Install dependencies
@@ -58,15 +66,23 @@ npm install
 
 ### 3. Set up environment variables
 
-Copy the example file and fill in your Supabase credentials:
+Copy the example file and fill in your credentials:
 
 ```bash
 cp .env.local.example .env.local
 ```
 
 ```env
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+
+# Logging
+LOG_LEVEL=debug
+
+# Sentry (optional)
+NEXT_PUBLIC_SENTRY_DSN=https://your-dsn@o0.ingest.sentry.io/0
+SENTRY_AUTH_TOKEN=sntrys_your-auth-token-here
 ```
 
 ### 4. Set up the database
@@ -74,15 +90,27 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 Run the SQL in `supabase/setup.sql` against your Supabase project. This creates:
 
 - The `profiles`, `hubs`, `hub_members`, `messages`, and `stat_logs` tables
+- `handle_new_user` trigger — auto-creates a profile on signup
+- `handle_new_hub_admin` trigger — auto-adds the hub creator as admin
 - `increment_hub_stat` and `decrement_hub_stat` RPC functions with audit logging
 - Row Level Security policies
 - Realtime publication on `hub_members`, `messages`, and `stat_logs`
+
+Then apply the migrations in order:
+
+```
+supabase/migration-001-multi-tenant.sql   — Multi-tenant hub setup
+supabase/migration-002-avatars-storage.sql — Avatar storage bucket
+supabase/migration-003-leave-delete-hub.sql — Cascade delete for leave/delete
+```
 
 ### 5. Start the dev server
 
 ```bash
 npm run dev
 ```
+
+Dev output is piped through `pino-pretty` for readable, colorized logs.
 
 Open [http://localhost:3000](http://localhost:3000).
 
@@ -92,7 +120,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start the Next.js development server |
+| `npm run dev` | Start the Next.js dev server with pretty-printed logs |
 | `npm run build` | Create a production build |
 | `npm run start` | Serve the production build locally |
 | `npm run lint` | Run ESLint with the Next.js config |
@@ -102,79 +130,141 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Project Structure
 
 ```
-striders-stats-hub/
-├── app/                              # Next.js App Router pages
-│   ├── layout.tsx                    # Root layout (metadata, fonts, dark mode)
-│   ├── page.tsx                      # / — Hub listing for authenticated users
-│   ├── globals.css                   # Theme (CSS custom properties)
-│   ├── error.tsx                     # Global error boundary
-│   ├── not-found.tsx                 # 404 page
+stats-hub/
+├── app/                                   # Next.js App Router pages
+│   ├── layout.tsx                         # Root layout (metadata, fonts, Sentry trace)
+│   ├── page.tsx                           # / — Hub listing for authenticated users
+│   ├── globals.css                        # Theme (CSS custom properties)
+│   ├── error.tsx                          # Error boundary with Sentry capture
+│   ├── global-error.tsx                   # Global error boundary
+│   ├── not-found.tsx                      # 404 page
 │   ├── auth/
-│   │   ├── page.tsx                  # /auth — Magic link + Google OAuth login
+│   │   ├── page.tsx                       # /auth — Magic link + Google OAuth login
 │   │   └── callback/
-│   │       └── route.ts             # OAuth callback handler
+│   │       └── route.ts                   # OAuth callback handler
+│   ├── profile/
+│   │   └── page.tsx                       # /profile — Edit name, avatar, sign out
 │   ├── hub/
 │   │   ├── create/
-│   │   │   └── page.tsx             # /hub/create — Create a new hub
+│   │   │   └── page.tsx                   # /hub/create — Create a new hub
 │   │   └── [hubId]/
-│   │       ├── layout.tsx           # Hub layout with HubProvider context
+│   │       ├── layout.tsx                 # Hub layout with HubProvider context
 │   │       ├── leaderboard/
-│   │       │   └── page.tsx         # /hub/:id/leaderboard — Tabs: Leaderboard, Activity, Chat
+│   │       │   └── page.tsx               # /hub/:id/leaderboard — Tabs: Leaderboard, Activity, Chat
 │   │       └── player/
 │   │           └── [memberId]/
-│   │               └── page.tsx     # /hub/:id/player/:memberId — Player stat pad
+│   │               └── page.tsx           # /hub/:id/player/:memberId — Player stat pad
 │   └── join/
-│       ├── page.tsx                 # /join — Enter invite code
+│       ├── page.tsx                       # /join — Enter invite code
 │       └── [code]/
-│           └── page.tsx             # /join/:code — Join hub confirmation
+│           └── page.tsx                   # /join/:code — Join hub confirmation
 │
-├── middleware.ts                     # Auth guard — redirects unauthenticated users to /auth
+├── middleware.ts                           # Auth guard, request logging, redirect logic
+├── instrumentation.ts                     # Sentry server/edge registration
+├── instrumentation-client.ts              # Sentry client-side init with replay
+├── sentry.server.config.ts                # Sentry server config
+├── sentry.edge.config.ts                  # Sentry edge config
 │
 ├── src/
-│   ├── components/
-│   │   ├── BottomNav.tsx            # Fixed bottom navigation bar
-│   │   ├── LeaderboardTabs.tsx      # Tab container (Leaderboard / Activity / Chat)
-│   │   ├── LeaderboardClient.tsx    # Realtime subscriptions + presence tracking
-│   │   ├── LeaderboardTable.tsx     # Sortable leaderboard with online indicators
-│   │   ├── PlayerProfileClient.tsx  # Stat increment/decrement UI
-│   │   ├── StatButton.tsx           # Animated +/- stat control
-│   │   ├── PlayerAvatar.tsx         # Avatar with image or initials fallback
-│   │   ├── hub/
-│   │   │   ├── CreateHubForm.tsx    # Hub creation form with invite code generation
-│   │   │   ├── HubCard.tsx          # Hub card for listing page
-│   │   │   └── JoinHubFlow.tsx      # Join hub confirmation flow
-│   │   ├── chat/
-│   │   │   ├── HubChat.tsx          # Real-time chat with optimistic updates
-│   │   │   ├── ChatMessage.tsx      # Individual message bubble
-│   │   │   └── ChatInput.tsx        # Message input field
+│   ├── features/                          # Feature-based modules
 │   │   ├── activity/
-│   │   │   ├── ActivityFeed.tsx     # Stat change audit log (admin can revert)
-│   │   │   └── ActivityLogItem.tsx  # Individual activity entry
-│   │   ├── providers/
-│   │   │   └── HubContext.tsx       # Hub context provider (hub, currentMember, profile)
-│   │   └── ui/                      # shadcn/ui component library
-│   ├── lib/
-│   │   ├── supabase.ts              # Browser Supabase client (lazy-initialized)
-│   │   ├── supabase-server.ts       # Server Supabase client factory
-│   │   ├── supabase-middleware.ts   # Middleware Supabase client for auth checks
-│   │   ├── database.types.ts        # Auto-generated Supabase types
-│   │   ├── types.ts                 # App types (Profile, Hub, HubMember, Message, StatLog)
-│   │   ├── validations.ts           # Zod schemas + slugify utility
-│   │   └── utils.ts                 # cn() class merging utility
-│   └── hooks/
-│       ├── use-auth.ts              # Client-side auth state hook
-│       └── use-mobile.tsx           # Mobile viewport detection hook
+│   │   │   ├── components/
+│   │   │   │   ├── ActivityFeed.tsx       # Realtime stat change log (admin revert)
+│   │   │   │   └── ActivityLogItem.tsx    # Individual activity entry
+│   │   │   └── index.ts                   # Barrel export
+│   │   ├── auth/
+│   │   │   ├── components/
+│   │   │   │   └── AuthForm.tsx           # Magic link + Google OAuth form
+│   │   │   └── index.ts
+│   │   ├── chat/
+│   │   │   ├── components/
+│   │   │   │   ├── HubChat.tsx            # Realtime chat with optimistic updates
+│   │   │   │   ├── ChatMessage.tsx        # Message bubble
+│   │   │   │   └── ChatInput.tsx          # Message input
+│   │   │   ├── lib/
+│   │   │   │   ├── types.ts               # Message type
+│   │   │   │   └── validations.ts         # Message validation (1–500 chars)
+│   │   │   └── index.ts
+│   │   ├── hub/
+│   │   │   ├── components/
+│   │   │   │   ├── HubCard.tsx            # Hub card with leave/delete options
+│   │   │   │   ├── CreateHubForm.tsx      # Hub creation with invite code gen
+│   │   │   │   ├── LeaderboardTabs.tsx    # Tab switcher (Leaderboard / Activity / Chat)
+│   │   │   │   ├── LeaderboardClient.tsx  # Realtime subscriptions + presence
+│   │   │   │   ├── LeaderboardTable.tsx   # Sortable table with rank and online status
+│   │   │   │   ├── PlayerProfileClient.tsx # Stat +/- pad
+│   │   │   │   ├── JoinHubFlow.tsx        # Join hub confirmation
+│   │   │   │   ├── CopyInviteLink.tsx     # Copy invite link button
+│   │   │   │   └── StatButton.tsx         # Animated stat control
+│   │   │   ├── lib/
+│   │   │   │   ├── types.ts               # Hub, HubMember, StatLog types
+│   │   │   │   └── validations.ts         # Hub creation schema, invite code gen
+│   │   │   ├── providers/
+│   │   │   │   └── HubContext.tsx         # Hub context (hub, currentMember, profile)
+│   │   │   └── index.ts
+│   │   ├── navigation/
+│   │   │   ├── components/
+│   │   │   │   ├── BottomNav.tsx           # Fixed bottom nav bar
+│   │   │   │   └── BackButton.tsx         # Back navigation button
+│   │   │   └── index.ts
+│   │   └── profile/
+│   │       ├── components/
+│   │       │   ├── ProfileForm.tsx         # Profile edit with avatar upload
+│   │       │   ├── PlayerAvatar.tsx        # Avatar with initials fallback
+│   │       │   └── UserAvatarButton.tsx   # Nav avatar link to /profile
+│   │       ├── lib/
+│   │       │   └── validations.ts         # Profile validation (name 2–50 chars)
+│   │       └── index.ts
+│   └── shared/                            # Shared utilities and UI components
+│       ├── components/
+│       │   └── ui/                        # shadcn/ui (Radix UI) components
+│       │       ├── alert-dialog.tsx
+│       │       ├── avatar.tsx
+│       │       ├── button.tsx
+│       │       ├── card.tsx
+│       │       ├── dropdown-menu.tsx
+│       │       ├── input.tsx
+│       │       ├── label.tsx
+│       │       ├── separator.tsx
+│       │       ├── skeleton.tsx
+│       │       ├── sonner.tsx
+│       │       └── tabs.tsx
+│       └── lib/
+│           ├── logger.ts                  # Pino logger with module-specific children
+│           ├── supabase.ts                # Browser Supabase client (singleton)
+│           ├── supabase-server.ts         # Server Supabase client factory
+│           ├── supabase-middleware.ts      # Middleware Supabase client
+│           ├── safe-async.ts              # Async error handling wrapper
+│           ├── database.types.ts          # Auto-generated Supabase types
+│           ├── types.ts                   # Profile type
+│           └── utils.ts                   # cn() class merging utility
 │
-├── supabase/
-│   ├── setup.sql                    # Full database schema & RLS setup
-│   └── migration-001-multi-tenant.sql # Multi-tenant migration
+├── public/                                # Static assets & PWA icons
+│   ├── manifest.json                      # PWA manifest
+│   ├── favicon.ico
+│   ├── favicon-16x16.png
+│   ├── favicon-32x32.png
+│   ├── apple-touch-icon.png
+│   ├── android-chrome-192x192.png
+│   ├── android-chrome-512x512.png
+│   └── icons/
+│       ├── icon-192.png
+│       ├── icon-512.png
+│       └── icon-512-maskable.png
+│
+├── supabase/                              # Database setup & migrations
+│   ├── setup.sql                          # Full schema, RLS, triggers, realtime
+│   ├── migration-001-multi-tenant.sql     # Multi-tenant hub setup
+│   ├── migration-002-avatars-storage.sql  # Avatar storage bucket
+│   └── migration-003-leave-delete-hub.sql # Cascade delete for leave/delete
 │
 └── Configuration
-    ├── next.config.mjs              # Image remote patterns, route redirects
-    ├── tailwind.config.ts           # Theme colors, fonts, animations
-    ├── tsconfig.json                # Path aliases (@/* → src/*)
-    ├── components.json              # shadcn/ui config
-    └── .eslintrc.json               # ESLint rules
+    ├── next.config.mjs                    # Sentry wrapper, image remotes, redirects
+    ├── tailwind.config.ts                 # Theme colors, fonts, animations
+    ├── tsconfig.json                      # Path aliases (@/*, @/features/*, @/shared/*)
+    ├── postcss.config.mjs                 # Tailwind CSS + autoprefixer
+    ├── components.json                    # shadcn/ui config
+    └── .eslintrc.json                     # ESLint rules
 ```
 
 ---
@@ -186,6 +276,7 @@ striders-stats-hub/
 | `/auth` | Public | Email magic link + Google OAuth login |
 | `/auth/callback` | Public | OAuth redirect handler |
 | `/` | Protected | Hub listing for the authenticated user |
+| `/profile` | Protected | Edit display name, upload avatar, sign out |
 | `/hub/create` | Protected | Create a new hub |
 | `/join` | Protected | Enter an invite code to join a hub |
 | `/join/[code]` | Protected | Join hub confirmation page |
@@ -251,6 +342,11 @@ striders-stats-hub/
 | `delta` | `int` | `-1` or `1` |
 | `created_at` | `timestamptz` | `now()` |
 
+### Triggers
+
+- **`handle_new_user`** — Automatically creates a profile row when a user signs up via Supabase Auth
+- **`handle_new_hub_admin`** — Automatically adds the hub creator as an admin member
+
 ### RPC Functions
 
 - **`increment_hub_stat(member_id, stat_column, hub_id)`** — Atomically increments a stat and creates an audit log entry
@@ -260,17 +356,49 @@ Both validate that `stat_column` is one of `goals`, `assists`, or `clean_sheets`
 
 ---
 
+## Error Monitoring & Logging
+
+### Sentry
+
+Sentry is integrated at every level of the stack:
+
+- **Error boundaries** — `error.tsx` and `global-error.tsx` capture unhandled errors
+- **Component-level capture** — Business logic errors in AuthForm, CreateHubForm, HubCard, JoinHubFlow, PlayerProfileClient, ActivityFeed, HubChat, CopyInviteLink, and ProfileForm
+- **Tunnel route** — `/monitoring` route bypasses ad-blockers for reliable error reporting
+- **Session replay** — 10% sample rate for error reproduction
+- **Source maps** — Uploaded to Sentry for readable stack traces
+- **Privacy** — `sendDefaultPii: false`; only user ID is attached to events
+
+### Pino Logging
+
+Structured logging with module-specific child loggers:
+
+| Logger | Module | Usage |
+|--------|--------|-------|
+| `dbLogger` | `db` | Database query errors |
+| `authLogger` | `auth` | Authentication events |
+| `hubLogger` | `hub` | Hub operations |
+| `pageLogger` | `page` | Page-level operations |
+
+Log level is configurable via the `LOG_LEVEL` environment variable (defaults to `debug` in development, `info` in production).
+
+---
+
 ## Architecture Decisions
 
+- **Feature-based architecture** — Code is organized by feature domain (`src/features/`) rather than by technical role. Each feature has its own `components/`, `lib/`, and optional `providers/` directories with barrel exports.
+- **Shared layer** — Cross-cutting concerns (Supabase clients, logger, UI primitives) live in `src/shared/`.
 - **Multi-tenant hubs** — Each hub is an isolated group with its own leaderboard, chat, and activity feed. Players join via invite codes.
-- **Supabase Auth** — Email magic link and Google OAuth. Middleware protects all routes except `/auth`.
+- **Supabase Auth** — Email magic link and Google OAuth. Middleware protects all routes except `/auth` and `/auth/callback`.
 - **Realtime via Supabase** — The leaderboard subscribes to `postgres_changes` on `hub_members`, `messages`, and `stat_logs` for live updates across all connected clients.
 - **Presence tracking** — Online status of hub members is tracked via Supabase Realtime presence channels.
 - **Optimistic UI** — Stat mutations and chat messages update local state immediately, then sync with Supabase. On failure, the UI reverts.
 - **Atomic RPC functions** — `increment_hub_stat`/`decrement_hub_stat` use `SECURITY DEFINER` to prevent race conditions and auto-create audit log entries.
 - **Audit trail** — All stat changes are logged in `stat_logs`. Admins can revert individual entries from the activity feed.
-- **Client-side image compression** — Photos are compressed before upload using `browser-image-compression`.
+- **Client-side image compression** — Avatar photos are compressed (max 1 MB, 512 px, WebP) before upload using `browser-image-compression`.
+- **Layered error handling** — Sentry for production monitoring, Pino for structured server logs, error boundaries for graceful UI recovery.
 - **Dark mode** — Dark-mode-only UI with CSS custom property theming.
+- **PWA-ready** — Web app manifest and icons for home screen installation on mobile devices.
 
 ---
 
@@ -289,18 +417,20 @@ Both validate that `stat_column` is one of `goals`, `assists`, or `clean_sheets`
 
 **Add a new route:** Create a folder in `app/` with a `page.tsx` file.
 
+**Add a new feature module:** Create a folder in `src/features/` with `components/`, `lib/` (optional), and an `index.ts` barrel export.
+
 **Add a shadcn/ui component:**
 
 ```bash
 npx shadcn@latest add <component-name>
 ```
 
-Components are placed in `src/components/ui/` per the `components.json` config.
+Components are placed in `src/shared/components/ui/` per the `components.json` config.
 
 **Add a new stat column:**
 
 1. Add the column to the `hub_members` table in Supabase
-2. Update `supabase/setup.sql` and `src/lib/database.types.ts`
+2. Update `supabase/setup.sql` and `src/shared/lib/database.types.ts`
 3. Add the column name to the validation list in `increment_hub_stat`/`decrement_hub_stat`
 4. Add a new `StatButton` in `PlayerProfileClient`
 
