@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { getSupabase } from "@/shared/lib/supabase";
 import { useHub } from "@/features/hub/providers/HubContext";
+import { useRealtimeList } from "@/features/hub/lib/use-realtime-list";
 import { ActivityLogItem } from "./ActivityLogItem";
 import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
@@ -15,58 +15,15 @@ interface ActivityFeedProps {
 
 export function ActivityFeed({ hubId, initialLogs }: ActivityFeedProps) {
   const { currentMember } = useHub();
-  const [logs, setLogs] = useState<StatLogWithDetails[]>(initialLogs);
+  const logs = useRealtimeList<StatLogWithDetails>({
+    hubId,
+    table: "stat_logs",
+    select: "*, profiles(*), hub_members(*, profiles(*))",
+    initialData: initialLogs,
+    order: "prepend",
+    events: ["INSERT", "DELETE"],
+  });
   const isAdmin = currentMember.role === "admin";
-
-  useEffect(() => {
-    const supabase = getSupabase();
-
-    const channel = supabase
-      .channel(`hub-${hubId}-stat-logs`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "stat_logs",
-          filter: `hub_id=eq.${hubId}`,
-        },
-        async (payload) => {
-          const newLog = payload.new as { id: string };
-          const { data } = await supabase
-            .from("stat_logs")
-            .select("*, profiles(*), hub_members(*, profiles(*))")
-            .eq("id", newLog.id)
-            .single();
-
-          if (data) {
-            setLogs((prev) => {
-              if (prev.some((l) => l.id === data.id)) return prev;
-              return [data as StatLogWithDetails, ...prev];
-            });
-          }
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: "stat_logs",
-          filter: `hub_id=eq.${hubId}`,
-        },
-        (payload) => {
-          setLogs((prev) =>
-            prev.filter((l) => l.id !== (payload.old as { id: string }).id)
-          );
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [hubId]);
 
   const handleRevert = async (log: StatLogWithDetails) => {
     const supabase = getSupabase();
