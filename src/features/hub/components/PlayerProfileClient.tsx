@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
 import { StatButton } from "./StatButton";
+import { useHub } from "../providers/HubContext";
 import * as Sentry from "@sentry/nextjs";
 import { getSupabase } from "@/shared/lib/supabase";
 import type { HubMemberWithProfile } from "../lib/types";
@@ -13,15 +14,15 @@ import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton
 interface PlayerProfileClientProps {
   member: HubMemberWithProfile;
   hubId: string;
-  isOwnProfile: boolean;
 }
 
 export function PlayerProfileClient({
   member,
   hubId,
-  isOwnProfile,
 }: PlayerProfileClientProps) {
   const router = useRouter();
+  const { currentProfile } = useHub();
+  const isOwnProfile = member.user_id === currentProfile.id;
   const [stats, setStats] = useState({
     goals: member.goals,
     assists: member.assists,

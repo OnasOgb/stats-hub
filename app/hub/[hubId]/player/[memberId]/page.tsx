@@ -11,10 +11,6 @@ interface PlayerPageProps {
 export default async function HubPlayerPage({ params }: PlayerPageProps) {
   const supabase = createServerSupabaseClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   // Fetch member with profile
   const { data: member, error: memberError } = await supabase
     .from("hub_members")
@@ -31,14 +27,10 @@ export default async function HubPlayerPage({ params }: PlayerPageProps) {
     notFound();
   }
 
-  const typedMember = member as HubMemberWithProfile;
-  const isOwnProfile = typedMember.user_id === user?.id;
-
   return (
     <PlayerProfileClient
-      member={typedMember}
+      member={member as HubMemberWithProfile}
       hubId={params.hubId}
-      isOwnProfile={isOwnProfile}
     />
   );
 }

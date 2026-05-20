@@ -2,22 +2,22 @@
 
 import Link from "next/link";
 import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
+import { useHub } from "../providers/HubContext";
 import type { HubMemberWithProfile } from "../lib/types";
 import { cn } from "@/shared/lib/utils";
 
 interface LeaderboardTableProps {
   hubId: string;
   members: HubMemberWithProfile[];
-  currentUserId?: string | null;
   onlineUsers?: Set<string>;
 }
 
 export function LeaderboardTable({
   hubId,
   members,
-  currentUserId,
   onlineUsers,
 }: LeaderboardTableProps) {
+  const { currentProfile } = useHub();
   const sorted = [...members].sort((a, b) => b.goals - a.goals);
 
   return (
@@ -35,7 +35,7 @@ export function LeaderboardTable({
       {sorted.map((member, i) => {
         const rank = i + 1;
         const isTop3 = rank <= 3;
-        const isCurrentUser = member.user_id === currentUserId;
+        const isCurrentUser = member.user_id === currentProfile.id;
         const isOnline = onlineUsers?.has(member.user_id);
 
         return (

@@ -10,7 +10,6 @@ import type { MessageWithSender } from "@/features/chat/lib/types";
 interface LeaderboardTabsProps {
   hubId: string;
   initialMembers: HubMemberWithProfile[];
-  currentUserId: string | null;
   initialMessages: MessageWithSender[];
   initialStatLogs: StatLogWithDetails[];
 }
@@ -18,7 +17,6 @@ interface LeaderboardTabsProps {
 export function LeaderboardTabs({
   hubId,
   initialMembers,
-  currentUserId,
   initialMessages,
   initialStatLogs,
 }: LeaderboardTabsProps) {
@@ -34,7 +32,6 @@ export function LeaderboardTabs({
         <LeaderboardClient
           hubId={hubId}
           initialMembers={initialMembers}
-          currentUserId={currentUserId}
         />
       </TabsContent>
 

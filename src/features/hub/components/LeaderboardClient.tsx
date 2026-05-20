@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getSupabase } from "@/shared/lib/supabase";
+import { useHub } from "../providers/HubContext";
 import { useRealtimeList } from "../lib/use-realtime-list";
 import { LeaderboardTable } from "./LeaderboardTable";
 import type { HubMemberWithProfile } from "../lib/types";
@@ -9,14 +10,13 @@ import type { HubMemberWithProfile } from "../lib/types";
 interface LeaderboardClientProps {
   hubId: string;
   initialMembers: HubMemberWithProfile[];
-  currentUserId: string | null;
 }
 
 export function LeaderboardClient({
   hubId,
   initialMembers,
-  currentUserId,
 }: LeaderboardClientProps) {
+  const { currentProfile } = useHub();
   const members = useRealtimeList<HubMemberWithProfile>({
     hubId,
     table: "hub_members",
@@ -43,21 +43,20 @@ export function LeaderboardClient({
         setOnlineUsers(online);
       })
       .subscribe(async (status) => {
-        if (status === "SUBSCRIBED" && currentUserId) {
-          await presenceChannel.track({ user_id: currentUserId });
+        if (status === "SUBSCRIBED") {
+          await presenceChannel.track({ user_id: currentProfile.id });
         }
       });
 
     return () => {
       supabase.removeChannel(presenceChannel);
     };
-  }, [hubId, currentUserId]);
+  }, [hubId, currentProfile.id]);
 
   return (
     <LeaderboardTable
       hubId={hubId}
       members={members}
-      currentUserId={currentUserId}
       onlineUsers={onlineUsers}
     />
   );
