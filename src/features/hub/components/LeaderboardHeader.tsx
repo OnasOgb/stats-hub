@@ -6,7 +6,7 @@ import { CopyInviteLink } from "./CopyInviteLink";
 import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton";
 
 export function LeaderboardHeader() {
-  const { hub, currentMember } = useHub();
+  const { hub, currentMember, currentProfile } = useHub();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
@@ -23,7 +23,7 @@ export function LeaderboardHeader() {
           )}
         </div>
         <div className="shrink-0">
-          <UserAvatarButton />
+          <UserAvatarButton name={currentProfile.name} avatarUrl={currentProfile.avatar_url} />
         </div>
       </div>
     </header>

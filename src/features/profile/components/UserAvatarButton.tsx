@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useHub } from "@/features/hub/providers/HubContext";
 import { PlayerAvatar } from "./PlayerAvatar";
 
-export function UserAvatarButton() {
-  const { currentProfile } = useHub();
+interface UserAvatarButtonProps {
+  name: string | null;
+  avatarUrl: string | null;
+}
 
+export function UserAvatarButton({ name, avatarUrl }: UserAvatarButtonProps) {
   return (
     <Link href="/profile" aria-label="Your profile">
       <PlayerAvatar
-        name={currentProfile.name}
-        avatarUrl={currentProfile.avatar_url}
+        name={name ?? ""}
+        avatarUrl={avatarUrl ?? undefined}
         size="sm"
         className="cursor-pointer transition-opacity hover:opacity-80"
       />

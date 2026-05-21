@@ -65,7 +65,7 @@ export function PlayerProfileClient({
       <header className="border-b border-border bg-background/90">
         <div className="mx-auto max-w-lg px-4 py-8 relative">
           <div className="absolute top-4 right-4">
-            <UserAvatarButton />
+            <UserAvatarButton name={currentProfile.name} avatarUrl={currentProfile.avatar_url} />
           </div>
           <div className="flex flex-col items-center gap-4">
           <PlayerAvatar
