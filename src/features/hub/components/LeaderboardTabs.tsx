@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { LeaderboardClient } from "./LeaderboardClient";
 import { HubChat } from "@/features/chat/components/HubChat";
-import { ActivityFeed } from "@/features/activity/components/ActivityFeed";
+import { ActivityFeed } from "./ActivityFeed";
 import type { HubMemberWithProfile, StatLogWithDetails } from "../lib/types";
 import type { MessageWithSender } from "@/features/chat/lib/types";
 

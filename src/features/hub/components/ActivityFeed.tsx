@@ -1,12 +1,12 @@
 "use client";
 
 import { getSupabase } from "@/shared/lib/supabase";
-import { useHub } from "@/features/hub/providers/HubContext";
-import { useRealtimeList } from "@/features/hub/lib/use-realtime-list";
+import { useHub } from "../providers/HubContext";
+import { useRealtimeList } from "../lib/use-realtime-list";
 import { ActivityLogItem } from "./ActivityLogItem";
 import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
-import type { StatLogWithDetails } from "@/features/hub/lib/types";
+import type { StatLogWithDetails } from "../lib/types";
 
 interface ActivityFeedProps {
   hubId: string;
