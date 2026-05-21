@@ -17,7 +17,7 @@ import {
   profileFormSchema,
   type ProfileFormValues,
 } from "../lib/validations";
-import type { Profile } from "@/shared/lib/types";
+import type { Profile } from "@/features/hub/lib/types";
 
 interface ProfileFormProps {
   profile: Profile;

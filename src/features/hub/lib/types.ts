@@ -1,6 +1,6 @@
 import type { Database } from "@/shared/lib/database.types";
-import type { Profile } from "@/shared/lib/types";
 
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Hub = Database["public"]["Tables"]["hubs"]["Row"];
 export type HubMember = Database["public"]["Tables"]["hub_members"]["Row"];
 export type HubMemberInsert = Database["public"]["Tables"]["hub_members"]["Insert"];

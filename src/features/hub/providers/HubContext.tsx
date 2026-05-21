@@ -1,8 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo } from "react";
-import type { Hub, HubMember } from "../lib/types";
-import type { Profile } from "@/shared/lib/types";
+import type { Hub, HubMember, Profile } from "../lib/types";
 
 interface HubContextValue {
   hub: Hub;
