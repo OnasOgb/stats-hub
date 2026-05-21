@@ -17,7 +17,7 @@ export function LeaderboardClient({
   initialMembers,
 }: LeaderboardClientProps) {
   const { currentProfile } = useHub();
-  const members = useRealtimeList<HubMemberWithProfile>({
+  const { items: members } = useRealtimeList<HubMemberWithProfile>({
     hubId,
     table: "hub_members",
     select: "*, profiles(*)",

@@ -15,7 +15,7 @@ interface ActivityFeedProps {
 
 export function ActivityFeed({ hubId, initialLogs }: ActivityFeedProps) {
   const { currentMember } = useHub();
-  const logs = useRealtimeList<StatLogWithDetails>({
+  const { items: logs } = useRealtimeList<StatLogWithDetails>({
     hubId,
     table: "stat_logs",
     select: "*, profiles(*), hub_members(*, profiles(*))",
