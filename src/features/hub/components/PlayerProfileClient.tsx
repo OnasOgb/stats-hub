@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
 import { StatButton } from "./StatButton";
 import { useHub } from "../providers/HubContext";
 import { useStatMutation } from "../lib/use-stat-mutation";
 import type { HubMemberWithProfile } from "../lib/types";
 import { Goal, Handshake, ShieldCheck } from "lucide-react";
-import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton";
 
 interface PlayerProfileClientProps {
   member: HubMemberWithProfile;
@@ -47,7 +47,14 @@ export function PlayerProfileClient({
       <header className="border-b border-border bg-background/90">
         <div className="mx-auto max-w-lg px-4 py-8 relative">
           <div className="absolute top-4 right-4">
-            <UserAvatarButton name={currentProfile.name} avatarUrl={currentProfile.avatar_url} />
+            <Link href="/profile" aria-label="Your profile">
+              <PlayerAvatar
+                name={currentProfile.name ?? ""}
+                avatarUrl={currentProfile.avatar_url ?? undefined}
+                size="sm"
+                className="cursor-pointer transition-opacity hover:opacity-80"
+              />
+            </Link>
           </div>
           <div className="flex flex-col items-center gap-4">
           <PlayerAvatar

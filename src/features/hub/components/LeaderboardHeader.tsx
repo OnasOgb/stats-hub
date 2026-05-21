@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { Trophy } from "lucide-react";
 import { useHub } from "../providers/HubContext";
 import { CopyInviteLink } from "./CopyInviteLink";
-import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton";
+import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
 
 export function LeaderboardHeader() {
   const { hub, isAdmin, currentProfile } = useHub();
@@ -23,7 +24,14 @@ export function LeaderboardHeader() {
           )}
         </div>
         <div className="shrink-0">
-          <UserAvatarButton name={currentProfile.name} avatarUrl={currentProfile.avatar_url} />
+          <Link href="/profile" aria-label="Your profile">
+            <PlayerAvatar
+              name={currentProfile.name ?? ""}
+              avatarUrl={currentProfile.avatar_url ?? undefined}
+              size="sm"
+              className="cursor-pointer transition-opacity hover:opacity-80"
+            />
+          </Link>
         </div>
       </div>
     </header>

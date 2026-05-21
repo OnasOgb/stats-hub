@@ -167,40 +167,34 @@ stats-hub/
 │
 ├── src/
 │   ├── features/                          # Feature-based modules
-│   │   ├── activity/
-│   │   │   ├── components/
-│   │   │   │   ├── ActivityFeed.tsx       # Realtime stat change log (admin revert)
-│   │   │   │   └── ActivityLogItem.tsx    # Individual activity entry
-│   │   │   └── index.ts                   # Barrel export
 │   │   ├── auth/
 │   │   │   ├── components/
 │   │   │   │   └── AuthForm.tsx           # Magic link + Google OAuth form
 │   │   │   └── index.ts
-│   │   ├── chat/
-│   │   │   ├── components/
-│   │   │   │   ├── HubChat.tsx            # Realtime chat with optimistic updates
-│   │   │   │   ├── ChatMessage.tsx        # Message bubble
-│   │   │   │   └── ChatInput.tsx          # Message input
-│   │   │   ├── lib/
-│   │   │   │   ├── types.ts               # Message type
-│   │   │   │   └── validations.ts         # Message validation (1–500 chars)
-│   │   │   └── index.ts
 │   │   ├── hub/
 │   │   │   ├── components/
-│   │   │   │   ├── HubCard.tsx            # Hub card with leave/delete options
-│   │   │   │   ├── CreateHubForm.tsx      # Hub creation with invite code gen
-│   │   │   │   ├── LeaderboardTabs.tsx    # Tab switcher (Leaderboard / Activity / Chat)
-│   │   │   │   ├── LeaderboardClient.tsx  # Realtime subscriptions + presence
-│   │   │   │   ├── LeaderboardTable.tsx   # Sortable table with rank and online status
-│   │   │   │   ├── PlayerProfileClient.tsx # Stat +/- pad
-│   │   │   │   ├── JoinHubFlow.tsx        # Join hub confirmation
+│   │   │   │   ├── ActivityFeed.tsx       # Realtime stat change log (admin revert)
+│   │   │   │   ├── ActivityLogItem.tsx    # Individual activity entry
+│   │   │   │   ├── ChatInput.tsx          # Message input
+│   │   │   │   ├── ChatMessage.tsx        # Message bubble
 │   │   │   │   ├── CopyInviteLink.tsx     # Copy invite link button
+│   │   │   │   ├── CreateHubForm.tsx      # Hub creation with invite code gen
+│   │   │   │   ├── HubCard.tsx            # Hub card with leave/delete options
+│   │   │   │   ├── HubChat.tsx            # Realtime chat with optimistic updates
+│   │   │   │   ├── JoinHubFlow.tsx        # Join hub confirmation
+│   │   │   │   ├── LeaderboardClient.tsx  # Realtime leaderboard with subscriptions + presence
+│   │   │   │   ├── LeaderboardHeader.tsx  # Hub name, invite link, and admin controls
+│   │   │   │   ├── LeaderboardTabs.tsx    # Tab switcher (Leaderboard / Activity / Chat)
+│   │   │   │   ├── PlayerProfileClient.tsx # Stat +/- pad
 │   │   │   │   └── StatButton.tsx         # Animated stat control
 │   │   │   ├── lib/
-│   │   │   │   ├── types.ts               # Hub, HubMember, StatLog types
+│   │   │   │   ├── queries.ts             # Supabase query functions for hub data
+│   │   │   │   ├── types.ts               # Hub, HubMember, StatLog, Message types
+│   │   │   │   ├── use-realtime-list.ts   # Generic realtime list subscription hook
+│   │   │   │   ├── use-stat-mutation.ts   # Centralized stat increment/decrement hook
 │   │   │   │   └── validations.ts         # Hub creation schema, invite code gen
 │   │   │   ├── providers/
-│   │   │   │   └── HubContext.tsx         # Hub context (hub, currentMember, profile)
+│   │   │   │   └── HubContext.tsx         # Hub context (hub, currentMember, profile, admin checks)
 │   │   │   └── index.ts
 │   │   ├── navigation/
 │   │   │   ├── components/
@@ -212,9 +206,8 @@ stats-hub/
 │   │       │   ├── ProfileForm.tsx         # Profile edit with avatar upload
 │   │       │   ├── PlayerAvatar.tsx        # Avatar with initials fallback
 │   │       │   └── UserAvatarButton.tsx   # Nav avatar link to /profile
-│   │       ├── lib/
-│   │       │   └── validations.ts         # Profile validation (name 2–50 chars)
-│   │       └── index.ts
+│   │       └── lib/
+│   │           └── validations.ts         # Profile validation (name 2–50 chars)
 │   └── shared/                            # Shared utilities and UI components
 │       ├── components/
 │       │   └── ui/                        # shadcn/ui (Radix UI) components
@@ -231,10 +224,10 @@ stats-hub/
 │       │       └── tabs.tsx
 │       └── lib/
 │           ├── logger.ts                  # Pino logger with module-specific children
+│           ├── mutate.ts                  # Sentry-integrated async mutation helper
 │           ├── supabase.ts                # Browser Supabase client (singleton)
 │           ├── supabase-server.ts         # Server Supabase client factory
 │           ├── supabase-middleware.ts      # Middleware Supabase client
-│           ├── safe-async.ts              # Async error handling wrapper
 │           ├── database.types.ts          # Auto-generated Supabase types
 │           ├── types.ts                   # Profile type
 │           └── utils.ts                   # cn() class merging utility
