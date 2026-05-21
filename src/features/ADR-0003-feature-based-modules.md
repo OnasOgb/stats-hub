@@ -21,20 +21,21 @@ Current feature modules:
 
 ```
 src/features/
-  activity/components/    # Activity feed
-  auth/components/        # Auth UI (login forms)
-  chat/
-    components/           # HubChat, ChatInput, ChatMessage
-    lib/                  # Chat types
+  auth/components/        # Auth UI (AuthForm: sign-in/sign-up, OAuth, magic link)
   hub/
-    components/           # Hub detail, leaderboard, player profile
-    lib/                  # Hub types
+    components/           # Leaderboard, activity feed, chat, player profile, hub cards
+    lib/                  # Domain types, queries, hooks (useRealtimeList, useStatMutation), validations
     providers/            # HubContext provider
-  navigation/components/  # Nav bar, bottom nav
   profile/
-    components/           # Profile page, avatar components
-    lib/                  # Profile types
+    components/           # ProfileForm, PlayerAvatar
+    lib/                  # Profile validations
 ```
+
+Hub-scoped views (Leaderboard, Activity Feed, chat) live under `hub/`, not as separate features — they share types, context, and hooks, making independent feature modules unjustified.
+
+Layout primitives (e.g., `BottomNav`) live in `src/shared/components/`, not in a feature folder — they are cross-cutting chrome, not domain features.
+
+There are no barrel `index.ts` files. All imports use direct paths (e.g., `@/features/hub/components/HubChat`, not `@/features/hub`). The file system provides discoverability; barrels duplicate it without adding leverage.
 
 Path aliases in `tsconfig.json` support this convention:
 
@@ -48,7 +49,7 @@ Path aliases in `tsconfig.json` support this convention:
 
 ### Positive
 - **Cohesion** — all code for a feature (components, types, helpers, providers) is co-located; changes typically touch one directory
-- **Discoverability** — a new contributor looking for "chat" code goes to `src/features/chat/`, not three different top-level folders
+- **Discoverability** — a new contributor looking for "chat" code goes to `src/features/hub/components/HubChat.tsx`, not three different top-level folders
 - **Deletability** — removing a feature means deleting one directory (plus route pages), not hunting across the tree
 - **Scales naturally** — adding a new feature creates a new folder without affecting existing ones
 
@@ -62,7 +63,7 @@ Path aliases in `tsconfig.json` support this convention:
 ### Technical-Role Folders (`components/`, `hooks/`, `lib/`)
 - **Pros:** Simple; no decisions about which feature a file belongs to; common in tutorials and starter templates
 - **Cons:** Related code is scattered; modifying a feature touches many directories; hard to understand feature boundaries
-- **Rejected because:** StatsHub has 6+ distinct features (chat, hub, profile, activity, auth, navigation) — technical-role folders would create a flat sea of 50+ files in `components/` with no grouping
+- **Rejected because:** StatsHub has 3 distinct features (hub, auth, profile) — technical-role folders would create a flat sea of 30+ files in `components/` with no grouping
 
 ### Domain-Driven Design (DDD) Bounded Contexts
 - **Pros:** Stronger boundaries; explicit dependency rules; well-suited for large teams
@@ -78,7 +79,7 @@ Path aliases in `tsconfig.json` support this convention:
 
 - The number of features stays manageable (< 15). If the project grows to 30+ features, a grouping layer above features (e.g., `src/features/social/chat/`) may be needed.
 - Cross-feature imports are rare and intentional. If features frequently import from each other, the feature boundaries may be wrong.
-- `src/shared/` remains small (UI primitives, Supabase clients, logger, types). If shared code grows large, it should be re-evaluated for feature extraction.
+- `src/shared/` remains small (UI primitives, layout chrome like BottomNav, Supabase clients, logger, utilities). If shared code grows large, it should be re-evaluated for feature extraction.
 
 ## Scope
 

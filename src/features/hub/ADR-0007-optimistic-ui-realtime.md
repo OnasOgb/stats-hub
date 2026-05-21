@@ -14,23 +14,26 @@ Supabase Realtime provides `postgres_changes` subscriptions that push row-level 
 
 We use optimistic UI updates for both chat messages and stat mutations. The pattern is:
 
-### Chat (`HubChat.tsx`)
-1. **Generate a UUID client-side** (`crypto.randomUUID()`)
-2. **Append the message to local state immediately** with a `pending` flag
-3. **Insert into `messages` table** via `supabase.from('messages').insert()`
-4. **On realtime INSERT event** from the same sender, remove the pending flag (confirm)
-5. **On insert error**, remove the optimistic message and show a toast error
+Both patterns are abstracted into reusable hooks in `src/features/hub/lib/`:
 
-### Stats (`PlayerProfileClient.tsx`)
-1. **Update local `stats` state immediately** (increment/decrement, floored at 0)
-2. **Call the RPC function** (`increment_hub_stat` / `decrement_hub_stat`) via `supabase.rpc()`
-3. **On RPC error**, revert the local state to the previous value
-4. **On success**, call `router.refresh()` to revalidate server-component data
+### Realtime lists — `useRealtimeList` hook
+Used by `HubChat.tsx`, `ActivityFeed.tsx`, and `LeaderboardClient.tsx`. The hook manages:
+1. **Supabase channel subscription** — subscribes to `postgres_changes` for a given table/hub
+2. **Optimistic inserts** — `addOptimistic()` appends an item with a `pending` flag immediately
+3. **Confirmation** — on realtime INSERT, the pending flag is removed via de-duplication (`pendingIds` Set)
+4. **Revert** — `revertOptimistic()` removes the item and shows a toast on error
+5. **UPDATE/DELETE** — merges updates and filters deletions from local state
+
+### Stat mutations — `useStatMutation` hook
+Used by `PlayerProfileClient.tsx` (stat +/−) and `ActivityFeed.tsx` (stat log revert). The hook provides:
+1. **`changeStat`** — calls the appropriate RPC (`increment_hub_stat` / `decrement_hub_stat`) with `onOptimistic` / `onRevert` / `onSuccess` callbacks
+2. **`revertStatLog`** — reverses a stat change and deletes the corresponding Stat Log entry
+3. **Error reporting** — delegates to the shared `mutate()` wrapper for Sentry + toast
 
 Key implementation details:
-- Chat messages use a `pendingIds` Set to track unconfirmed messages and a de-duplication check (`prev.some(m => m.id === data.id)`) to prevent doubles when the realtime event arrives
-- Stats use simple state rollback (`prev[stat] - delta`) on error, without realtime subscription (the `router.refresh()` fetches fresh data from the server)
-- Both patterns report errors to Sentry with `extra` context for debugging
+- Chat messages use `useRealtimeList` with `addOptimistic` / `revertOptimistic` for the optimistic insert/confirm/revert cycle
+- Stats use `useStatMutation` with callback-based optimistic state; `PlayerProfileClient` calls `router.refresh()` on success to revalidate server-component data
+- Both hooks report errors to Sentry with `extra` context for debugging
 
 ## Consequences
 
@@ -72,7 +75,7 @@ Key implementation details:
 
 ## Scope
 
-- **Applies to:** Chat message sending (`HubChat.tsx`) and stat increment/decrement (`PlayerProfileClient.tsx`)
+- **Applies to:** Chat message sending (`HubChat.tsx`), stat increment/decrement (`PlayerProfileClient.tsx`), stat log revert (`ActivityFeed.tsx`), and realtime list updates (`LeaderboardClient.tsx`). The two reusable hooks — `useRealtimeList` and `useStatMutation` — centralize these patterns in `src/features/hub/lib/`
 - **Does not apply to:** Read-only data fetching (server components), profile updates, hub creation, or joining hubs — these use standard request/response without optimistic updates
 
 ## Security Implications
@@ -83,8 +86,8 @@ Key implementation details:
 
 ## Cost Implications
 
-- **Upfront:** Implementing optimistic update logic and de-duplication in two components. Moderate complexity, already done.
-- **Ongoing:** Each new feature with write operations must decide whether to use optimistic updates. The pattern is established but not abstracted into a reusable hook — each component implements it independently.
+- **Upfront:** Implementing optimistic update logic and de-duplication, now centralized in two reusable hooks (`useRealtimeList`, `useStatMutation`). Already done.
+- **Ongoing:** Each new feature with write operations must decide whether to use optimistic updates. New realtime lists can use `useRealtimeList`; new stat-like mutations can follow the `useStatMutation` pattern. The hooks handle channel lifecycle, de-duplication, and error reporting — new consumers only provide callbacks.
 
 ## Success Metrics / Validation Criteria
 

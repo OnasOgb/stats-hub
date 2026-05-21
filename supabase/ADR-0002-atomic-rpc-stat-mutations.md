@@ -63,7 +63,7 @@ Both functions are defined in `supabase/migration-001-multi-tenant.sql` (lines 8
 
 ## Scope
 
-- **Applies to:** All stat increment/decrement operations in the application, specifically `PlayerProfileClient.tsx` which calls `supabase.rpc('increment_hub_stat', ...)` and `supabase.rpc('decrement_hub_stat', ...)`
+- **Applies to:** All stat increment/decrement operations in the application. Client-side RPC calls are centralized in the `useStatMutation` hook (`src/features/hub/lib/use-stat-mutation.ts`), which is consumed by `PlayerProfileClient.tsx` (stat +/−) and `ActivityFeed.tsx` (stat log revert)
 - **Does not apply to:** Other `SECURITY DEFINER` functions (`handle_new_user`, `handle_new_hub_admin`) which are trigger-based and don't involve stat mutations
 - **Does not apply to:** Read queries on `hub_members` or `stat_logs`, which go through normal RLS-protected PostgREST queries
 
