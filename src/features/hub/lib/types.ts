@@ -16,3 +16,7 @@ export type StatLogWithDetails = StatLog & {
 export type MembershipWithHub = HubMember & {
   hubs: Hub & { hub_members: { count: number }[] };
 };
+
+export type Message = Database["public"]["Tables"]["messages"]["Row"];
+export type MessageInsert = Database["public"]["Tables"]["messages"]["Insert"];
+export type MessageWithSender = Message & { profiles: Profile };

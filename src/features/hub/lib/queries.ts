@@ -1,8 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
 import { hubLogger, pageLogger } from "@/shared/lib/logger";
-import type { Hub, HubMember, HubMemberWithProfile, MembershipWithHub, StatLogWithDetails } from "./types";
-import type { MessageWithSender } from "@/features/chat/lib/types";
+import type { Hub, HubMember, HubMemberWithProfile, MembershipWithHub, MessageWithSender, StatLogWithDetails } from "./types";
 import type { Profile } from "@/shared/lib/types";
 
 /**

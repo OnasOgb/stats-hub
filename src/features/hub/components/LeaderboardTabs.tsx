@@ -2,10 +2,9 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { LeaderboardClient } from "./LeaderboardClient";
-import { HubChat } from "@/features/chat/components/HubChat";
+import { HubChat } from "./HubChat";
 import { ActivityFeed } from "./ActivityFeed";
-import type { HubMemberWithProfile, StatLogWithDetails } from "../lib/types";
-import type { MessageWithSender } from "@/features/chat/lib/types";
+import type { HubMemberWithProfile, MessageWithSender, StatLogWithDetails } from "../lib/types";
 
 interface LeaderboardTabsProps {
   hubId: string;

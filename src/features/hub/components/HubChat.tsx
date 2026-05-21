@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import { getSupabase } from "@/shared/lib/supabase";
 import { mutate } from "@/shared/lib/mutate";
-import { useHub } from "@/features/hub/providers/HubContext";
-import { useRealtimeList } from "@/features/hub/lib/use-realtime-list";
+import { useHub } from "../providers/HubContext";
+import { useRealtimeList } from "../lib/use-realtime-list";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import type { MessageWithSender } from "../lib/types";
