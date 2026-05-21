@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
 import { StatButton } from "./StatButton";
 import { useHub } from "../providers/HubContext";
-import { getSupabase } from "@/shared/lib/supabase";
-import { mutate } from "@/shared/lib/mutate";
+import { useStatMutation } from "../lib/use-stat-mutation";
 import type { HubMemberWithProfile } from "../lib/types";
 import { Goal, Handshake, ShieldCheck } from "lucide-react";
 import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton";
@@ -22,6 +21,7 @@ export function PlayerProfileClient({
 }: PlayerProfileClientProps) {
   const router = useRouter();
   const { currentProfile } = useHub();
+  const { changeStat } = useStatMutation(hubId);
   const isOwnProfile = member.user_id === currentProfile.id;
   const [stats, setStats] = useState({
     goals: member.goals,
@@ -29,35 +29,17 @@ export function PlayerProfileClient({
     clean_sheets: member.clean_sheets,
   });
 
-  const handleChange = async (
+  const handleChange = (
     stat: "goals" | "assists" | "clean_sheets",
-    delta: number
+    delta: 1 | -1,
   ) => {
-    // Optimistic update
-    setStats((prev) => ({
-      ...prev,
-      [stat]: Math.max(0, prev[stat] + delta),
-    }));
-
-    const rpcName = delta > 0 ? "increment_hub_stat" : "decrement_hub_stat";
-    const { error } = await mutate({
-      fn: () => getSupabase().rpc(rpcName, {
-        p_member_id: member.id,
-        p_stat_column: stat,
-        p_hub_id: hubId,
-      }),
-      context: "PlayerProfile: stat update",
-      extra: { stat, memberId: member.id },
+    changeStat(member.id, stat, delta, {
+      onOptimistic: () =>
+        setStats((prev) => ({ ...prev, [stat]: Math.max(0, prev[stat] + delta) })),
+      onRevert: () =>
+        setStats((prev) => ({ ...prev, [stat]: Math.max(0, prev[stat] - delta) })),
+      onSuccess: () => router.refresh(),
     });
-
-    if (error) {
-      setStats((prev) => ({
-        ...prev,
-        [stat]: Math.max(0, prev[stat] - delta),
-      }));
-    } else {
-      router.refresh();
-    }
   };
 
   return (
