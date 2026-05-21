@@ -85,7 +85,6 @@ stats-hub/
 │       └── lib/
 │           ├── database.types.ts # ⚠ Auto-generated — do not hand-edit
 │           ├── logger.ts
-│           ├── safe-async.ts
 │           ├── supabase.ts       # Browser client
 │           ├── supabase-server.ts
 │           └── supabase-middleware.ts
@@ -141,12 +140,7 @@ New features go in `src/features/{name}/` with sub-folders for `components/`, `l
 ```
 
 ### Error handling
-Use `safeAsync()` for async operations in server code. It returns a tuple:
-```typescript
-type SafeResult<T> = [T, null] | [null, Error];
-
-const [data, error] = await safeAsync(() => fetchSomething(), "context string");
-```
+Server pages check Supabase errors inline and log them with the appropriate child logger. Client components report errors to Sentry with `extra` context.
 
 ### Logging
 Use module-specific child loggers from `src/shared/lib/logger.ts`:
@@ -267,12 +261,11 @@ When working in this codebase:
 1. **Read the ADR in the directory you're working in before making architectural changes** — ADRs document hard-to-reverse decisions with full rationale. Check section 8 for the registry.
 2. **Follow feature-based module structure** — new features go in `src/features/{name}/`
 3. **Reuse existing Supabase clients** — don't create new ones
-4. **Use `safeAsync()`** for async error handling in server code
-5. **Use module-specific loggers** from `src/shared/lib/logger.ts`
-6. **Report errors to Sentry** with `extra` context in client components
-7. **Don't hand-edit** `database.types.ts` or `src/shared/components/ui/*`
-8. **Follow conventional commit format** (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`)
-9. **Dark mode only** — no light mode styles
+4. **Use module-specific loggers** from `src/shared/lib/logger.ts`
+5. **Report errors to Sentry** with `extra` context in client components
+6. **Don't hand-edit** `database.types.ts` or `src/shared/components/ui/*`
+7. **Follow conventional commit format** (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`)
+8. **Dark mode only** — no light mode styles
 
 ## 16. Metadata
 
