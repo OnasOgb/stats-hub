@@ -1,6 +1,6 @@
 import { loadHubSession } from "@/features/hub/lib/queries";
 import { HubProvider } from "@/features/hub/providers/HubContext";
-import { BottomNav } from "@/features/navigation/components/BottomNav";
+import { BottomNav } from "@/shared/components/BottomNav";
 import { Toaster } from "@/shared/components/ui/sonner";
 
 interface HubLayoutProps {
