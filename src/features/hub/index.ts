@@ -3,7 +3,6 @@ export { CreateHubForm } from "./components/CreateHubForm";
 export { JoinHubFlow } from "./components/JoinHubFlow";
 export { CopyInviteLink } from "./components/CopyInviteLink";
 export { LeaderboardClient } from "./components/LeaderboardClient";
-export { LeaderboardTable } from "./components/LeaderboardTable";
 export { LeaderboardTabs } from "./components/LeaderboardTabs";
 export { StatButton } from "./components/StatButton";
 export { PlayerProfileClient } from "./components/PlayerProfileClient";

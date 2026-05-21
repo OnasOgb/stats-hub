@@ -12,7 +12,7 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ hubId, initialLogs }: ActivityFeedProps) {
-  const { currentMember } = useHub();
+  const { canMutateStats } = useHub();
   const { revertStatLog } = useStatMutation(hubId);
   const { items: logs } = useRealtimeList<StatLogWithDetails>({
     hubId,
@@ -22,7 +22,6 @@ export function ActivityFeed({ hubId, initialLogs }: ActivityFeedProps) {
     order: "prepend",
     events: ["INSERT", "DELETE"],
   });
-  const isAdmin = currentMember.role === "admin";
 
   return (
     <div className="space-y-2">
@@ -40,7 +39,7 @@ export function ActivityFeed({ hubId, initialLogs }: ActivityFeedProps) {
             statType={log.stat_type}
             delta={log.delta}
             createdAt={log.created_at}
-            showRevert={isAdmin}
+            showRevert={canMutateStats}
             onRevert={() => revertStatLog(log)}
           />
         ))

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 import type { Hub, HubMember } from "../lib/types";
 import type { Profile } from "@/shared/lib/types";
 
@@ -8,6 +8,12 @@ interface HubContextValue {
   hub: Hub;
   currentMember: HubMember;
   currentProfile: Profile;
+  /** Whether the current Hub Member has the Admin role. */
+  isAdmin: boolean;
+  /** Admins can increment/decrement Stats for any Hub Member. */
+  canMutateStats: boolean;
+  /** Only an Admin can delete a Hub. */
+  canDeleteHub: boolean;
 }
 
 const HubContext = createContext<HubContextValue | null>(null);
@@ -17,9 +23,21 @@ export function HubProvider({
   currentMember,
   currentProfile,
   children,
-}: HubContextValue & { children: React.ReactNode }) {
+}: { hub: Hub; currentMember: HubMember; currentProfile: Profile; children: React.ReactNode }) {
+  const value = useMemo<HubContextValue>(() => {
+    const isAdmin = currentMember.role === "admin";
+    return {
+      hub,
+      currentMember,
+      currentProfile,
+      isAdmin,
+      canMutateStats: isAdmin,
+      canDeleteHub: isAdmin,
+    };
+  }, [hub, currentMember, currentProfile]);
+
   return (
-    <HubContext.Provider value={{ hub, currentMember, currentProfile }}>
+    <HubContext.Provider value={value}>
       {children}
     </HubContext.Provider>
   );

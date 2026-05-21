@@ -6,7 +6,7 @@ import { CopyInviteLink } from "./CopyInviteLink";
 import { UserAvatarButton } from "@/features/profile/components/UserAvatarButton";
 
 export function LeaderboardHeader() {
-  const { hub, currentMember, currentProfile } = useHub();
+  const { hub, isAdmin, currentProfile } = useHub();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
@@ -18,7 +18,7 @@ export function LeaderboardHeader() {
           <h1 className="text-lg font-bold tracking-tight truncate">
             {hub.name}
           </h1>
-          {currentMember.role === "admin" && (
+          {isAdmin && (
             <CopyInviteLink inviteCode={hub.invite_code} />
           )}
         </div>
