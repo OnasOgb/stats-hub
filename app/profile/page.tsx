@@ -1,34 +1,11 @@
-import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
-import { pageLogger } from "@/shared/lib/logger";
 import { ProfileForm } from "@/features/profile/components/ProfileForm";
 import { BackButton } from "@/features/navigation/components/BackButton";
+import { loadProfile } from "@/features/hub/lib/queries";
 
 export const revalidate = 0;
 
 export default async function ProfilePage() {
-  const supabase = createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/auth");
-  }
-
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (profileError) {
-    pageLogger.error({ err: profileError }, "profile: failed to fetch profile");
-  }
-
-  if (!profile) {
-    redirect("/auth");
-  }
+  const { profile, email } = await loadProfile();
 
   return (
     <div className="flex min-h-screen flex-col bg-background px-4 pb-20">
@@ -46,7 +23,7 @@ export default async function ProfilePage() {
       </header>
 
       <main className="mx-auto w-full max-w-lg pt-6 flex-1">
-        <ProfileForm profile={profile} email={user.email ?? ""} />
+        <ProfileForm profile={profile} email={email} />
       </main>
     </div>
   );

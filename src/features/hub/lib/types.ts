@@ -11,3 +11,8 @@ export type StatLogWithDetails = StatLog & {
   profiles: Profile;
   hub_members: HubMember & { profiles: Profile };
 };
+
+/** Home page: a membership row with its hub and that hub's member count. */
+export type MembershipWithHub = HubMember & {
+  hubs: Hub & { hub_members: { count: number }[] };
+};

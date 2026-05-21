@@ -1,34 +1,13 @@
-import { redirect } from "next/navigation";
 import { Trophy, Plus, LogIn } from "lucide-react";
 import Link from "next/link";
-import { createServerSupabaseClient } from "@/shared/lib/supabase-server";
-import { pageLogger } from "@/shared/lib/logger";
 import { Button } from "@/shared/components/ui/button";
 import { HubCard } from "@/features/hub/components/HubCard";
+import { loadHomePage } from "@/features/hub/lib/queries";
 
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const supabase = createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/auth");
-  }
-
-  // Fetch user's hubs with hub details and member counts
-  const { data: memberships, error: membershipsError } = await supabase
-    .from("hub_members")
-    .select("*, hubs(*, hub_members(count))")
-    .eq("user_id", user.id);
-
-  if (membershipsError) {
-    pageLogger.error({ err: membershipsError }, "home: failed to fetch hub memberships");
-  }
-
-  const hubs = memberships ?? [];
+  const { memberships: hubs } = await loadHomePage();
 
   return (
     <div className="flex min-h-screen flex-col bg-background px-4 pb-20">
