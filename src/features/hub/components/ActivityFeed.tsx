@@ -1,11 +1,10 @@
 "use client";
 
 import { getSupabase } from "@/shared/lib/supabase";
+import { mutate } from "@/shared/lib/mutate";
 import { useHub } from "../providers/HubContext";
 import { useRealtimeList } from "../lib/use-realtime-list";
 import { ActivityLogItem } from "./ActivityLogItem";
-import * as Sentry from "@sentry/nextjs";
-import { toast } from "sonner";
 import type { StatLogWithDetails } from "../lib/types";
 
 interface ActivityFeedProps {
@@ -27,32 +26,27 @@ export function ActivityFeed({ hubId, initialLogs }: ActivityFeedProps) {
 
   const handleRevert = async (log: StatLogWithDetails) => {
     const supabase = getSupabase();
-
-    // Reverse the stat change
     const reverseRpc =
       log.delta > 0 ? "decrement_hub_stat" : "increment_hub_stat";
-    const { error: rpcError } = await supabase.rpc(reverseRpc, {
-      p_member_id: log.member_id,
-      p_stat_column: log.stat_type,
-      p_hub_id: hubId,
+
+    const { error: rpcError } = await mutate({
+      fn: () => supabase.rpc(reverseRpc, {
+        p_member_id: log.member_id,
+        p_stat_column: log.stat_type,
+        p_hub_id: hubId,
+      }),
+      context: "ActivityFeed: stat revert RPC",
+      extra: { logId: log.id, statType: log.stat_type },
+      errorMessage: "Failed to revert stat",
     });
+    if (rpcError) return;
 
-    if (rpcError) {
-      Sentry.captureException(rpcError, { extra: { context: "ActivityFeed: stat revert RPC", logId: log.id, statType: log.stat_type } });
-      toast.error("Failed to revert stat");
-      return;
-    }
-
-    // Delete the log entry
-    const { error: deleteError } = await supabase
-      .from("stat_logs")
-      .delete()
-      .eq("id", log.id);
-
-    if (deleteError) {
-      Sentry.captureException(deleteError, { extra: { context: "ActivityFeed: stat log deletion", logId: log.id } });
-      toast.error("Stat reverted but log entry couldn't be removed");
-    }
+    await mutate({
+      fn: () => supabase.from("stat_logs").delete().eq("id", log.id),
+      context: "ActivityFeed: stat log deletion",
+      extra: { logId: log.id },
+      errorMessage: "Stat reverted but log entry couldn't be removed",
+    });
   };
 
   return (

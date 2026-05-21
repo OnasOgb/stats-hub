@@ -2,12 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { getSupabase } from "@/shared/lib/supabase";
+import { mutate } from "@/shared/lib/mutate";
 import { useHub } from "@/features/hub/providers/HubContext";
 import { useRealtimeList } from "@/features/hub/lib/use-realtime-list";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import * as Sentry from "@sentry/nextjs";
-import { toast } from "sonner";
 import type { MessageWithSender } from "../lib/types";
 
 interface HubChatProps {
@@ -54,19 +53,19 @@ export function HubChat({ hubId, initialMessages }: HubChatProps) {
       profiles: currentProfile,
     });
 
-    const { error } = await getSupabase()
-      .from("messages")
-      .insert({
+    const { error } = await mutate({
+      fn: () => getSupabase().from("messages").insert({
         id,
         hub_id: hubId,
         sender_id: currentProfile.id,
         content,
-      });
+      }),
+      context: "HubChat: message send",
+      errorMessage: "Failed to send message",
+    });
 
     if (error) {
-      Sentry.captureException(error, { extra: { context: "HubChat: message send" } });
       revertOptimistic(id);
-      toast.error("Failed to send message");
     }
   };
 

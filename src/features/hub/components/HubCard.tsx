@@ -11,8 +11,8 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import * as Sentry from "@sentry/nextjs";
 import { getSupabase } from "@/shared/lib/supabase";
+import { mutate } from "@/shared/lib/mutate";
 import type { Hub } from "../lib/types";
 import {
   DropdownMenu,
@@ -48,35 +48,23 @@ export function HubCard({ hub, role, memberCount, membershipId }: HubCardProps) 
 
   async function handleLeaveHub() {
     setLoading(true);
-    const supabase = getSupabase();
-    const { error } = await supabase
-      .from("hub_members")
-      .delete()
-      .eq("id", membershipId);
-
-    if (error) {
-      Sentry.captureException(error, { extra: { context: "HubCard: leave hub", membershipId } });
-      setLoading(false);
-      return;
-    }
-
+    const { error } = await mutate({
+      fn: () => getSupabase().from("hub_members").delete().eq("id", membershipId),
+      context: "HubCard: leave hub",
+      extra: { membershipId },
+    });
+    if (error) { setLoading(false); return; }
     router.refresh();
   }
 
   async function handleDeleteHub() {
     setLoading(true);
-    const supabase = getSupabase();
-    const { error } = await supabase
-      .from("hubs")
-      .delete()
-      .eq("id", hub.id);
-
-    if (error) {
-      Sentry.captureException(error, { extra: { context: "HubCard: delete hub", hubId: hub.id } });
-      setLoading(false);
-      return;
-    }
-
+    const { error } = await mutate({
+      fn: () => getSupabase().from("hubs").delete().eq("id", hub.id),
+      context: "HubCard: delete hub",
+      extra: { hubId: hub.id },
+    });
+    if (error) { setLoading(false); return; }
     router.refresh();
   }
 
