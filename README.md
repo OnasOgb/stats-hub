@@ -168,48 +168,32 @@ stats-hub/
 ├── src/
 │   ├── features/                          # Feature-based modules
 │   │   ├── auth/
-│   │   │   ├── components/
-│   │   │   │   └── AuthForm.tsx           # Magic link + Google OAuth form
-│   │   │   └── index.ts
+│   │   │   └── components/
+│   │   │       └── AuthForm.tsx           # Magic link + Google OAuth form
 │   │   ├── hub/
 │   │   │   ├── components/
 │   │   │   │   ├── ActivityFeed.tsx       # Realtime stat change log (admin revert)
-│   │   │   │   ├── ActivityLogItem.tsx    # Individual activity entry
-│   │   │   │   ├── ChatInput.tsx          # Message input
-│   │   │   │   ├── ChatMessage.tsx        # Message bubble
-│   │   │   │   ├── CopyInviteLink.tsx     # Copy invite link button
 │   │   │   │   ├── CreateHubForm.tsx      # Hub creation with invite code gen
 │   │   │   │   ├── HubCard.tsx            # Hub card with leave/delete options
 │   │   │   │   ├── HubChat.tsx            # Realtime chat with optimistic updates
 │   │   │   │   ├── JoinHubFlow.tsx        # Join hub confirmation
 │   │   │   │   ├── LeaderboardClient.tsx  # Realtime leaderboard with subscriptions + presence
 │   │   │   │   ├── LeaderboardHeader.tsx  # Hub name, invite link, and admin controls
-│   │   │   │   ├── LeaderboardTabs.tsx    # Tab switcher (Leaderboard / Activity / Chat)
-│   │   │   │   ├── PlayerProfileClient.tsx # Stat +/- pad
-│   │   │   │   └── StatButton.tsx         # Animated stat control
+│   │   │   │   └── PlayerProfileClient.tsx # Stat +/- pad
 │   │   │   ├── lib/
 │   │   │   │   ├── queries.ts             # Supabase query functions for hub data
-│   │   │   │   ├── types.ts               # Hub, HubMember, StatLog, Message types
+│   │   │   │   ├── types.ts               # Hub, HubMember, StatLog, Message, Profile types
 │   │   │   │   ├── use-realtime-list.ts   # Generic realtime list subscription hook
-│   │   │   │   ├── use-stat-mutation.ts   # Centralized stat increment/decrement hook
-│   │   │   │   └── validations.ts         # Hub creation schema, invite code gen
-│   │   │   ├── providers/
-│   │   │   │   └── HubContext.tsx         # Hub context (hub, currentMember, profile, admin checks)
-│   │   │   └── index.ts
-│   │   ├── navigation/
-│   │   │   ├── components/
-│   │   │   │   ├── BottomNav.tsx           # Fixed bottom nav bar
-│   │   │   │   └── BackButton.tsx         # Back navigation button
-│   │   │   └── index.ts
+│   │   │   │   └── use-stat-mutation.ts   # Centralized stat increment/decrement hook
+│   │   │   └── providers/
+│   │   │       └── HubContext.tsx         # Hub context (hub, currentMember, profile, admin checks)
 │   │   └── profile/
-│   │       ├── components/
-│   │       │   ├── ProfileForm.tsx         # Profile edit with avatar upload
-│   │       │   ├── PlayerAvatar.tsx        # Avatar with initials fallback
-│   │       │   └── UserAvatarButton.tsx   # Nav avatar link to /profile
-│   │       └── lib/
-│   │           └── validations.ts         # Profile validation (name 2–50 chars)
+│   │       └── components/
+│   │           ├── ProfileForm.tsx         # Profile edit with avatar upload
+│   │           └── PlayerAvatar.tsx        # Avatar with initials fallback
 │   └── shared/                            # Shared utilities and UI components
 │       ├── components/
+│       │   ├── BottomNav.tsx              # Fixed bottom nav bar
 │       │   └── ui/                        # shadcn/ui (Radix UI) components
 │       │       ├── alert-dialog.tsx
 │       │       ├── avatar.tsx
@@ -223,14 +207,12 @@ stats-hub/
 │       │       ├── sonner.tsx
 │       │       └── tabs.tsx
 │       └── lib/
+│           ├── cn.ts                      # cn() class merging utility
 │           ├── logger.ts                  # Pino logger with module-specific children
 │           ├── mutate.ts                  # Sentry-integrated async mutation helper
 │           ├── supabase.ts                # Browser Supabase client (singleton)
 │           ├── supabase-server.ts         # Server Supabase client factory
-│           ├── supabase-middleware.ts      # Middleware Supabase client
-│           ├── database.types.ts          # Auto-generated Supabase types
-│           ├── types.ts                   # Profile type
-│           └── utils.ts                   # cn() class merging utility
+│           └── database.types.ts          # Auto-generated Supabase types
 │
 ├── public/                                # Static assets & PWA icons
 │   ├── manifest.json                      # PWA manifest
@@ -356,7 +338,7 @@ Both validate that `stat_column` is one of `goals`, `assists`, or `clean_sheets`
 Sentry is integrated at every level of the stack:
 
 - **Error boundaries** — `error.tsx` and `global-error.tsx` capture unhandled errors
-- **Component-level capture** — Business logic errors in AuthForm, CreateHubForm, HubCard, JoinHubFlow, PlayerProfileClient, ActivityFeed, HubChat, CopyInviteLink, and ProfileForm
+- **Component-level capture** — Business logic errors in AuthForm, CreateHubForm, HubCard, JoinHubFlow, PlayerProfileClient, ActivityFeed, HubChat, LeaderboardHeader, and ProfileForm
 - **Tunnel route** — `/monitoring` route bypasses ad-blockers for reliable error reporting
 - **Session replay** — 10% sample rate for error reproduction
 - **Source maps** — Uploaded to Sentry for readable stack traces
@@ -379,7 +361,7 @@ Log level is configurable via the `LOG_LEVEL` environment variable (defaults to 
 
 ## Architecture Decisions
 
-- **Feature-based architecture** — Code is organized by feature domain (`src/features/`) rather than by technical role. Each feature has its own `components/`, `lib/`, and optional `providers/` directories with barrel exports.
+- **Feature-based architecture** — Code is organized by feature domain (`src/features/`) rather than by technical role. Each feature has its own `components/`, `lib/`, and optional `providers/` directories. No barrel files; all imports use direct file paths.
 - **Shared layer** — Cross-cutting concerns (Supabase clients, logger, UI primitives) live in `src/shared/`.
 - **Multi-tenant hubs** — Each hub is an isolated group with its own leaderboard, chat, and activity feed. Players join via invite codes.
 - **Supabase Auth** — Email magic link and Google OAuth. Middleware protects all routes except `/auth` and `/auth/callback`.
@@ -410,7 +392,7 @@ Log level is configurable via the `LOG_LEVEL` environment variable (defaults to 
 
 **Add a new route:** Create a folder in `app/` with a `page.tsx` file.
 
-**Add a new feature module:** Create a folder in `src/features/` with `components/`, `lib/` (optional), and an `index.ts` barrel export.
+**Add a new feature module:** Create a folder in `src/features/` with `components/` and `lib/` (optional). Use direct file path imports — no barrel `index.ts` files.
 
 **Add a shadcn/ui component:**
 
@@ -425,7 +407,7 @@ Components are placed in `src/shared/components/ui/` per the `components.json` c
 1. Add the column to the `hub_members` table in Supabase
 2. Update `supabase/setup.sql` and `src/shared/lib/database.types.ts`
 3. Add the column name to the validation list in `increment_hub_stat`/`decrement_hub_stat`
-4. Add a new `StatButton` in `PlayerProfileClient`
+4. Add the new stat controls in `PlayerProfileClient`
 
 ---
 

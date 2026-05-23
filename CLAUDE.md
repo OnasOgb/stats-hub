@@ -31,11 +31,10 @@ src/
     auth/components/         # AuthForm (Google OAuth + email magic link)
     hub/
       components/            # LeaderboardClient, ActivityFeed, HubChat, PlayerProfileClient, etc.
-      lib/                   # types, queries, validations, useRealtimeList, useStatMutation
+      lib/                   # types, queries, useRealtimeList, useStatMutation
       providers/             # HubContext (hub, member, profile, permission flags)
     profile/
       components/            # ProfileForm, PlayerAvatar
-      lib/                   # validations
   shared/
     components/ui/           # shadcn/ui primitives (Radix + Tailwind)
     components/BottomNav.tsx  # Mobile navigation
@@ -55,7 +54,7 @@ Path aliases: `@/*` → `src/*`, `@/features/*` → `src/features/*`, `@/shared/
 
 ### Supabase is the entire backend (no API routes, no ORM)
 
-- **Auth:** Supabase Auth (Google OAuth + magic link). Three client factories: browser (`supabase.ts`), server (`supabase-server.ts`), middleware (`supabase-middleware.ts`).
+- **Auth:** Supabase Auth (Google OAuth + magic link). Two client factories: browser (`supabase.ts`), server (`supabase-server.ts`). Middleware uses `createServerClient` from `@supabase/ssr` directly.
 - **Database:** PostgreSQL via Supabase SDK directly. Schema in `supabase/setup.sql` and migration files. Five tables: `profiles`, `hubs`, `hub_members`, `messages`, `stat_logs`.
 - **Authorization:** RLS policies on all tables. No application-layer permission checks. The database is the sole authorization boundary.
 - **Realtime:** Supabase Realtime `postgres_changes` on `hub_members`, `messages`, `stat_logs`.
@@ -92,7 +91,7 @@ Use these terms consistently in code, comments, and commits:
 
 ## Key Conventions
 
-- **Validation:** Zod schemas in feature `lib/validations.ts`, used with `react-hook-form` + `@hookform/resolvers`.
+- **Validation:** Zod schemas co-located inline in the components that use them (e.g., `CreateHubForm`, `ProfileForm`), used with `react-hook-form` + `@hookform/resolvers`.
 - **UI components:** shadcn/ui (Radix UI + Tailwind). Icons from `lucide-react`.
 - **CSS:** OKLCH color tokens in `globals.css`, dark mode only (class `dark` hardcoded on `<html>`). No light theme.
 - **Middleware:** Auth guard redirects unauthenticated users to `/auth`. Public paths: `/auth`, `/auth/callback`.

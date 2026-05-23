@@ -84,4 +84,4 @@ Key policy patterns (from `supabase/migration-001-multi-tenant.sql`):
 - Reassess if: the permission model grows beyond member/admin (fine-grained roles), RLS policy debugging becomes a significant time sink, or automated policy testing becomes feasible
 
 ---
-**Related ADRs:** [ADR-0001](../src/shared/lib/ADR-0001-supabase-sole-backend.md), [ADR-0002](ADR-0002-atomic-rpc-stat-mutations.md)
+**Related ADRs:** [ADR-0001](ADR-0001-supabase-sole-backend.md), [ADR-0002](ADR-0002-atomic-rpc-stat-mutations.md)

@@ -24,11 +24,10 @@ src/features/
   auth/components/        # Auth UI (AuthForm: sign-in/sign-up, OAuth, magic link)
   hub/
     components/           # Leaderboard, activity feed, chat, player profile, hub cards
-    lib/                  # Domain types, queries, hooks (useRealtimeList, useStatMutation), validations
+    lib/                  # Domain types, queries, hooks (useRealtimeList, useStatMutation)
     providers/            # HubContext provider
   profile/
     components/           # ProfileForm, PlayerAvatar
-    lib/                  # Profile validations
 ```
 
 Hub-scoped views (Leaderboard, Activity Feed, chat) live under `hub/`, not as separate features — they share types, context, and hooks, making independent feature modules unjustified.
@@ -103,4 +102,4 @@ No direct security implications. The module structure is an organizational conve
 - Reassess if: cross-feature imports become common (> 30% of imports), the number of features exceeds 15, or the `shared/` directory grows to rival individual features in size
 
 ---
-**Related ADRs:** [ADR-0007](hub/ADR-0007-optimistic-ui-realtime.md)
+**Related ADRs:** [ADR-0007](ADR-0007-optimistic-ui-realtime.md)

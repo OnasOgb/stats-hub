@@ -98,4 +98,4 @@ Key implementation details:
 - Reassess if: realtime event delivery becomes unreliable (pending messages stick), stat mutation frequency increases significantly, or a query cache library is adopted for other reasons
 
 ---
-**Related ADRs:** [ADR-0001](../../shared/lib/ADR-0001-supabase-sole-backend.md), [ADR-0002](../../../supabase/ADR-0002-atomic-rpc-stat-mutations.md)
+**Related ADRs:** [ADR-0001](ADR-0001-supabase-sole-backend.md), [ADR-0002](ADR-0002-atomic-rpc-stat-mutations.md)

@@ -12,13 +12,13 @@ Supabase provides PostgreSQL, Auth (Google OAuth + magic link), Storage, and Rea
 
 ## Decision
 
-We use Supabase as the entire backend. All data access flows through the Supabase client SDK — there are no custom Next.js API routes for business logic. Three client factories cover every runtime context:
+We use Supabase as the entire backend. All data access flows through the Supabase client SDK — there are no custom Next.js API routes for business logic. Two client factories plus an inline middleware client cover every runtime context:
 
 | Context | Factory | File |
 |---------|---------|------|
 | Browser (client components) | `getSupabase()` | `src/shared/lib/supabase.ts` |
 | Server components / route handlers | `createServerSupabaseClient()` | `src/shared/lib/supabase-server.ts` |
-| Middleware | `createMiddlewareSupabaseClient()` | `src/shared/lib/supabase-middleware.ts` |
+| Middleware | `createServerClient()` (from `@supabase/ssr`) | `middleware.ts` (inline) |
 
 Authentication is delegated entirely to Supabase Auth (Google OAuth + email magic link OTP). User profiles are auto-created via a `handle_new_user` database trigger — no signup API route exists.
 
@@ -30,7 +30,7 @@ The only API route in the project is `/api/monitoring` (Sentry tunnel), which is
 - Zero API boilerplate — no controllers, serializers, or route handlers to maintain
 - Auth, storage, realtime, and database are a single vendor with a unified SDK
 - Row-level security (RLS) enforces authorization at the database layer, removing an entire class of "forgot to check permissions" bugs
-- Typed client via `Database` generic keeps queries type-safe across all three contexts
+- Typed client via `Database` generic keeps queries type-safe across all contexts
 - Solo maintainer can ship features faster with fewer moving parts
 
 ### Negative
@@ -73,7 +73,7 @@ The only API route in the project is `/api/monitoring` (Sentry tunnel), which is
 
 - The Supabase anon key is embedded in client-side JavaScript — it is public by design. **All authorization depends on RLS policies** (see ADR-0004).
 - `SECURITY DEFINER` RPC functions bypass RLS and must validate `auth.uid()` internally (see ADR-0002).
-- Cookie-based session management is handled by `@supabase/ssr` across all three client factories. The middleware client refreshes sessions on every request.
+- Cookie-based session management is handled by `@supabase/ssr` across both client factories and the inline middleware client. The middleware client refreshes sessions on every request.
 - `sendDefaultPii: false` in Sentry config ensures no email addresses leak through error reports.
 
 ## Cost Implications
@@ -89,4 +89,4 @@ The only API route in the project is `/api/monitoring` (Sentry tunnel), which is
 - Reassess if: Supabase free tier limits are hit, query patterns require raw SQL beyond RPC functions, or a second maintainer finds the RLS-only approach too opaque
 
 ---
-**Related ADRs:** [ADR-0002](../../../supabase/ADR-0002-atomic-rpc-stat-mutations.md), [ADR-0004](../../../supabase/ADR-0004-rls-sole-authorization.md), [ADR-0008](../../../ADR-0008-sentry-multi-layer-monitoring.md)
+**Related ADRs:** [ADR-0002](ADR-0002-atomic-rpc-stat-mutations.md), [ADR-0004](ADR-0004-rls-sole-authorization.md), [ADR-0008](ADR-0008-sentry-multi-layer-monitoring.md)

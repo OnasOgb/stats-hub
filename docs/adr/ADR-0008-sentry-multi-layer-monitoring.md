@@ -114,4 +114,4 @@ We configure Sentry across all three Next.js runtime layers with a tunnel route 
 - Reassess if: Sentry billing exceeds budget, the tunnel route causes measurable server load, Pino-Sentry correlation (shared trace IDs) becomes necessary, or an alternative monitoring service offers better value
 
 ---
-**Related ADRs:** [ADR-0006](src/shared/lib/ADR-0006-pino-stdout-no-transports.md), [ADR-0001](src/shared/lib/ADR-0001-supabase-sole-backend.md)
+**Related ADRs:** [ADR-0006](ADR-0006-pino-stdout-no-transports.md), [ADR-0001](ADR-0001-supabase-sole-backend.md)

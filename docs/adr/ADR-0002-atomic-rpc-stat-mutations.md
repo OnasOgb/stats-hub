@@ -88,4 +88,4 @@ Both functions are defined in `supabase/migration-001-multi-tenant.sql` (lines 8
 - Reassess if: new stat types are added frequently (consider a data-driven approach), transaction volume grows to a point where row-level locking causes contention, or Supabase Edge Functions become a simpler alternative
 
 ---
-**Related ADRs:** [ADR-0001](../src/shared/lib/ADR-0001-supabase-sole-backend.md), [ADR-0004](ADR-0004-rls-sole-authorization.md), [ADR-0007](../src/features/hub/ADR-0007-optimistic-ui-realtime.md)
+**Related ADRs:** [ADR-0001](ADR-0001-supabase-sole-backend.md), [ADR-0004](ADR-0004-rls-sole-authorization.md), [ADR-0007](ADR-0007-optimistic-ui-realtime.md)

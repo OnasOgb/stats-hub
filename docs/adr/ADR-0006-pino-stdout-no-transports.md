@@ -110,4 +110,4 @@ experimental: {
 - Reassess if: a log aggregation service is adopted that requires a specific transport, Next.js resolves the webpack/worker-thread incompatibility with Pino transports, or a correlation ID with Sentry is needed
 
 ---
-**Related ADRs:** [ADR-0008](../../../ADR-0008-sentry-multi-layer-monitoring.md)
+**Related ADRs:** [ADR-0008](ADR-0008-sentry-multi-layer-monitoring.md)
