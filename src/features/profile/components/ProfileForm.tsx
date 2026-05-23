@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import imageCompression from "browser-image-compression";
 import * as Sentry from "@sentry/nextjs";
 import { Camera, Loader2, LogOut } from "lucide-react";
@@ -13,11 +14,17 @@ import { Label } from "@/shared/components/ui/label";
 import { Separator } from "@/shared/components/ui/separator";
 import { PlayerAvatar } from "./PlayerAvatar";
 import { getSupabase } from "@/shared/lib/supabase";
-import {
-  profileFormSchema,
-  type ProfileFormValues,
-} from "../lib/validations";
 import type { Profile } from "@/features/hub/lib/types";
+
+const profileFormSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(50, "Name must be 50 characters or less")
+    .transform((s) => s.trim()),
+});
+
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 interface ProfileFormProps {
   profile: Profile;
@@ -101,7 +108,7 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
           const oldPath = profile.avatar_url.split("/avatars/")[1];
           if (oldPath) {
             supabase.storage.from("avatars").remove([oldPath]).catch((err) => {
-              console.warn("ProfileForm: old avatar cleanup failed", { err }); 
+              console.warn("ProfileForm: old avatar cleanup failed", { err });
             });
           }
         }
