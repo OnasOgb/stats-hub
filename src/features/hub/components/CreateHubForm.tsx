@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
@@ -11,11 +12,22 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { getSupabase } from "@/shared/lib/supabase";
-import {
-  createHubSchema,
-  type CreateHubValues,
-  generateInviteCode,
-} from "../lib/validations";
+
+const createHubSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(30),
+});
+
+type CreateHubValues = z.infer<typeof createHubSchema>;
+
+const SAFE_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
+
+function generateInviteCode(length = 6): string {
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += SAFE_ALPHABET[Math.floor(Math.random() * SAFE_ALPHABET.length)];
+  }
+  return code;
+}
 
 const MAX_RETRIES = 3;
 
@@ -73,7 +85,7 @@ export function CreateHubForm() {
 
         // Only retry on generic unique violations (likely invite_code)
         if (hubError.code !== "23505") throw hubError;
-        
+
         if (attempt === MAX_RETRIES - 1) {
           throw new Error("Could not generate a unique invite code. Please try again.");
         }
@@ -83,7 +95,7 @@ export function CreateHubForm() {
 
       /**
        * NOTE: Manual 'hub_members' insertion removed.
-       * The Database Trigger 'handle_new_hub_admin' in setup.sql 
+       * The Database Trigger 'handle_new_hub_admin' in setup.sql
        * handles this automatically and atomically.
        */
 
