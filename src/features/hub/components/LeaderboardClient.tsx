@@ -6,7 +6,7 @@ import { getSupabase } from "@/shared/lib/supabase";
 import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
 import { useHub } from "../providers/HubContext";
 import { useRealtimeList } from "../lib/use-realtime-list";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import type { HubMemberWithProfile } from "../lib/types";
 
 interface LeaderboardClientProps {

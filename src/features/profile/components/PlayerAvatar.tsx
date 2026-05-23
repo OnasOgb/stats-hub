@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 interface PlayerAvatarProps {
   name: string;

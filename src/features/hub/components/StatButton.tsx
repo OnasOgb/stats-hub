@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { type LucideIcon, Plus, Minus } from "lucide-react";
 import { useState } from "react";
 
