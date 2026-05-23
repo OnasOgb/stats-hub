@@ -1,13 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Trophy } from "lucide-react";
+import { Trophy, Link as LinkIcon, Check } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
+import { toast } from "sonner";
 import { useHub } from "../providers/HubContext";
-import { CopyInviteLink } from "./CopyInviteLink";
 import { PlayerAvatar } from "@/features/profile/components/PlayerAvatar";
 
 export function LeaderboardHeader() {
   const { hub, isAdmin, currentProfile } = useHub();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    const url = `${window.location.origin}/join/${hub.invite_code}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("Invite link copied to clipboard!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      Sentry.captureException(err, { extra: { context: "LeaderboardHeader: clipboard write" } });
+      toast.error("Failed to copy invite link");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
@@ -20,7 +36,22 @@ export function LeaderboardHeader() {
             {hub.name}
           </h1>
           {isAdmin && (
-            <CopyInviteLink inviteCode={hub.invite_code} />
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-3 w-3 text-green-500" />
+                  <span className="text-green-500">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <LinkIcon className="h-3 w-3" />
+                  <span>Copy invite link</span>
+                </>
+              )}
+            </button>
           )}
         </div>
         <div className="shrink-0">
