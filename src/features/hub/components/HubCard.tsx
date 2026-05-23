@@ -52,6 +52,7 @@ export function HubCard({ hub, role, memberCount, membershipId }: HubCardProps) 
       fn: () => getSupabase().from("hub_members").delete().eq("id", membershipId),
       context: "HubCard: leave hub",
       extra: { membershipId },
+      errorMessage: "Failed to leave hub",
     });
     if (error) { setLoading(false); return; }
     router.refresh();
@@ -63,6 +64,7 @@ export function HubCard({ hub, role, memberCount, membershipId }: HubCardProps) 
       fn: () => getSupabase().from("hubs").delete().eq("id", hub.id),
       context: "HubCard: delete hub",
       extra: { hubId: hub.id },
+      errorMessage: "Failed to delete hub",
     });
     if (error) { setLoading(false); return; }
     router.refresh();

@@ -47,7 +47,7 @@ export function useRealtimeList<T extends { id: string }>({
 
   const addOptimistic = (item: T) => {
     optimisticIdsRef.current.add(item.id);
-    setItems((prev) => [...prev, item]);
+    setItems((prev) => (order === "prepend" ? [item, ...prev] : [...prev, item]));
     setPendingIds((prev) => new Set(prev).add(item.id));
   };
 
@@ -85,7 +85,6 @@ export function useRealtimeList<T extends { id: string }>({
               next.delete(newId);
               return next;
             });
-            return;
           }
 
           const { data } = await supabase
