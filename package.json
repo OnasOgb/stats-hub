@@ -18,7 +18,7 @@
     "test:db:start": "docker-compose -f docker-compose.test.yml up -d",
     "test:db:stop": "docker-compose -f docker-compose.test.yml down",
     "test:db:reset": "docker-compose -f docker-compose.test.yml down -v && docker-compose -f docker-compose.test.yml up -d",
-    "db:migrate": "node scripts/migrate.js"
+    "db:migrate": "npx ts-node scripts/migrate.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

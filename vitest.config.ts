@@ -11,10 +11,10 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['app/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}'],
+      include: ['src/**/*.{ts,tsx}', 'app/**/*.{ts,tsx}'],
       exclude: [
         'node_modules/',
-        'app/**/__tests__/**',
+        '**/__tests__/**',
         '**/*.d.ts',
         '**/*.config.{ts,js}',
       ],
@@ -24,7 +24,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './'),
+      '@': path.resolve(__dirname, './src'),
       '@/features': path.resolve(__dirname, './src/features'),
       '@/shared': path.resolve(__dirname, './src/shared'),
     },

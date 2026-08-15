@@ -3,7 +3,6 @@ import '@testing-library/jest-dom';
 
 // Load test environment variables
 process.env.DATABASE_URL = 'postgres://test_user:test_password@localhost:5433/stats_hub_test';
-process.env.NODE_ENV = 'test';
 
 // Initialize test database before all tests
 beforeAll(async () => {

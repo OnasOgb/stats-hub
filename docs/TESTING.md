@@ -156,7 +156,7 @@ test.describe('Feature Flow', () => {
 Reusable test data is in `lib/__tests__/fixtures.ts`.
 
 ```typescript
-import { testUser, testHub } from '@/lib/__tests__/fixtures';
+import { testUser, testHub } from '../../../lib/__tests__/fixtures';
 
 // Use in tests
 const user = testUser;
