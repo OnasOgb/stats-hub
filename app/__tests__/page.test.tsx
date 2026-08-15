@@ -1,55 +1,37 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { cn } from '@/shared/lib/utils';
 
-// Mock server-side dependencies that can't be loaded in jsdom environment
-vi.mock('@/shared/lib/supabase-server', () => ({
-  createServerSupabaseClient: vi.fn(() => ({
-    auth: {
-      getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
-    },
-    from: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
-      }),
-    }),
-  })),
-}));
-
-vi.mock('@/shared/lib/logger', () => ({
-  pageLogger: {
-    error: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-  },
-}));
-
-vi.mock('@/shared/components/ui/button', () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-}));
-
-vi.mock('@/features/hub/components/HubCard', () => ({
-  HubCard: ({ hub }: any) => <div data-testid="hub-card">{hub?.name || 'Hub'}</div>,
-}));
-
-vi.mock('next/navigation', () => ({
-  redirect: vi.fn(),
-}));
-
-vi.mock('next/link', () => ({
-  default: ({ children, href }: any) => <a href={href}>{children}</a>,
-}));
-
-describe('Home Page', () => {
-  it('should verify test infrastructure is working', () => {
-    // Simple test to verify vitest and React Testing Library are configured correctly
-    const TestComponent = () => <div><h1>Test Component</h1></div>;
-    const { container } = render(<TestComponent />);
-    expect(container).toBeTruthy();
-    expect(screen.getByRole('heading')).toBeInTheDocument();
+describe('cn utility function', () => {
+  it('should merge Tailwind classes correctly', () => {
+    const result = cn('px-2', 'py-1');
+    expect(result).toContain('px-2');
+    expect(result).toContain('py-1');
   });
 
-  it('should execute without configuration errors', () => {
-    // Verify that the test can run without import or configuration errors
-    expect(true).toBe(true);
+  it('should handle conditional classes', () => {
+    const isActive = true;
+    const result = cn('bg-white', isActive && 'border-blue-500');
+    expect(result).toContain('bg-white');
+    expect(result).toContain('border-blue-500');
+  });
+
+  it('should resolve conflicting Tailwind utility classes', () => {
+    // When conflicting utilities are passed, tailwind-merge resolves them
+    const result = cn('px-2', 'px-4');
+    // px-4 should override px-2
+    expect(result).toContain('px-4');
+    expect(result).not.toContain('px-2');
+  });
+
+  it('should handle arrays of classes', () => {
+    const result = cn(['rounded-lg', 'shadow-md']);
+    expect(result).toContain('rounded-lg');
+    expect(result).toContain('shadow-md');
+  });
+
+  it('should handle empty inputs', () => {
+    const result = cn('', undefined, null as any, false);
+    expect(result).toBeDefined();
+    expect(typeof result).toBe('string');
   });
 });
